@@ -58,3 +58,16 @@ def test_the_page_offers_a_theme_colour_for_both_schemes(client):
     assert "#f7f6f3" in page and "#16151a" in page, (
         "one theme colour means a white splash on a phone that lives in dark mode"
     )
+
+
+def test_the_two_files_a_browser_fetches_on_its_own_are_never_gated():
+    """An install must not depend on the visitor's session.
+
+    The test suite runs with auth off and the deployed app does not, so this pins the list
+    itself: `/sw.js` answered 200 locally and 303 in production, which no test could see —
+    and a worker script served as a redirect is rejected outright.
+    """
+    from app.main import PUBLIC_PATHS
+
+    assert "/sw.js" in PUBLIC_PATHS, "a gated worker script cannot register"
+    assert "/favicon.ico" in PUBLIC_PATHS

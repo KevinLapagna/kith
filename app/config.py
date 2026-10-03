@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 APP_NAME = "Kith"
-APP_VERSION = "0.10.0"
+APP_VERSION = "0.10.1"
 
 # Bumped by hand whenever a migration is added; tests assert it matches the highest
 # migration on disk, so the two can never drift apart silently.

@@ -34,9 +34,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STARTED_AT = time.monotonic()
 
 # Reachable without a session: the login page, the health endpoint (the container
-# healthcheck and Caddy both probe it), and static assets. Everything else is gated
-# when KITH_AUTH is on.
-PUBLIC_PATHS = {"/login", "/logout", "/api/health", "/favicon.ico"}
+# healthcheck and Caddy both probe it), static assets, and the two files a browser fetches
+# on its own account when deciding whether this app can be installed. `/sw.js` especially:
+# a service worker script that answers with a redirect is rejected outright, so gating it
+# would make installation fail with nothing in the app to show for it.
+PUBLIC_PATHS = {"/login", "/logout", "/api/health", "/favicon.ico", "/sw.js"}
 
 
 def asset_version() -> str:
