@@ -8,6 +8,19 @@
   <link rel="stylesheet" href="/static/css/trainer.css?v={{ asset_v() }}">
   {% block head %}{% endblock %}
   <script src="/static/js/live-search.js?v={{ asset_v() }}" defer></script>
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="icon" href="/static/icon/favicon.ico" sizes="any">
+  <link rel="icon" href="/static/icon/kith-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/static/icon/apple-touch-icon.png">
+  <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16151a" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-title" content="Kith">
+  <script>
+    // Installable, not offline-first: the shell is cached, the training itself never is.
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js?v={{ asset_v() }}");
+    }
+  </script>
 </head>
 <body>
   <header class="top">

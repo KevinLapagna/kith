@@ -12,8 +12,10 @@ Conventions in this file:
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
 # NB: the class the multipart parser actually instantiates. FastAPI's `UploadFile`
 # *subclasses* this one, so `isinstance(parsed, fastapi.UploadFile)` is False for every
 # upload — checking against Starlette's class is what makes uploads arrive at all.
@@ -24,6 +26,10 @@ from app.repo import groups as groups_repo
 from app.repo import people as people_repo
 from app.repo import photos as photos_repo
 from app.repo import stats as stats_repo
+
+# Static files, resolved from this file rather than from the app's cwd: the two routes below
+# serve from the root, where a Mount cannot reach.
+STATIC = Path(__file__).resolve().parents[2] / "static"
 
 UPLOAD_ERRORS = {
     "not_an_image": "That file is not an image Kith can read.",
@@ -416,5 +422,20 @@ def build_router() -> APIRouter:
                 found = conn.execute("SELECT name FROM grp WHERE id = ?", (group_id,)).fetchone()
                 group_name = found["name"] if found else None
         return render(request, "sheet.html", rows=rows, group_name=group_name)
+
+    # ── what a browser asks for before it will install the app ────────────────
+    @router.get("/sw.js")
+    def service_worker() -> Response:
+        """Served from the root, not /static/: a worker's scope is its own directory."""
+        return FileResponse(
+            STATIC / "sw.js",
+            media_type="text/javascript",
+            headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
+        )
+
+    @router.get("/favicon.ico")
+    def favicon() -> Response:
+        """A 404 in the log on every single page view, until now."""
+        return FileResponse(STATIC / "icon" / "favicon.ico", media_type="image/x-icon")
 
     return router

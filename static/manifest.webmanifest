@@ -1,0 +1,20 @@
+{
+  "name": "Kith — names & faces",
+  "short_name": "Kith",
+  "description": "A single-user trainer for the names and faces you keep forgetting.",
+  "start_url": "/train",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f6f3",
+  "theme_color": "#f7f6f3",
+  "icons": [
+    { "src": "/static/icon/kith-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/icon/kith-512.png", "sizes": "512x512", "type": "image/png" },
+    {
+      "src": "/static/icon/kith-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
