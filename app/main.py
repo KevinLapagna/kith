@@ -26,7 +26,7 @@ from fastapi.templating import Jinja2Templates
 from app import auth, config, db
 from app.repo import groups as groups_repo
 from app.repo import people as people_repo
-from app.routers import auth_routes, pages, train
+from app.routers import auth_routes, data, pages, train
 
 log = logging.getLogger("kith")
 
@@ -226,6 +226,7 @@ def create_app(settings: config.Settings | None = None) -> FastAPI:
     app.include_router(auth_routes.build_router())
     app.include_router(pages.build_router())
     app.include_router(train.build_router())
+    app.include_router(data.build_router())
     return app
 
 

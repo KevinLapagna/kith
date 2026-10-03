@@ -235,6 +235,35 @@ def _validated(fields: dict[str, object], *, partial: bool = False) -> dict[str,
     return values
 
 
+def sheet_rows(conn: sqlite3.Connection, *, group_id: int | None = None) -> list[dict]:
+    """Everyone who belongs on a printed sheet, with a photo, in one query.
+
+    The name this prints is the one the trainer *asks* with — what you want to say out loud,
+    which is not always the legal name. A person with no photo still gets a row: a missing
+    face is precisely what you would want to notice in the hour before the party, not
+    something the query should quietly hide.
+    """
+    sql = f"""
+        SELECT p.id,
+               {recall_name()} AS asked_name,
+               p.family_name,
+               p.mnemonic,
+               (SELECT ph.id FROM photo ph WHERE ph.person_id = p.id
+                 ORDER BY ph.is_primary DESC, ph.id LIMIT 1) AS photo_id
+          FROM person p
+         WHERE p.status = 'active'
+    """
+    params: list[object] = []
+    if group_id:
+        sql += (
+            " AND EXISTS (SELECT 1 FROM grp_member m"
+            " WHERE m.person_id = p.id AND m.grp_id = ?)"
+        )
+        params.append(group_id)
+    sql += " ORDER BY asked_name COLLATE NOCASE"
+    return [dict(row) for row in conn.execute(sql, params)]
+
+
 def stats(conn: sqlite3.Connection) -> dict:
     """Counts for the dashboard. One query per number, which is honest at this size."""
     counts = dict(

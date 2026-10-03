@@ -1,0 +1,85 @@
+/* The sheet: one page, ink only where it earns its place.
+ *
+ * Its own stylesheet, deliberately not the app's: this page is white on purpose, even on a
+ * phone in dark mode, because the thing it exists for happens on paper. The layout is a
+ * plain grid so that a browser's own print engine — which is the PDF exporter — has as
+ * little as possible to get wrong. */
+
+:root { color-scheme: light; }
+
+body {
+  margin: 0;
+  padding: 18px;
+  background: #fff;
+  color: #111;
+  font: 16px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+h1 { font-size: 20px; margin: 0 0 14px; }
+
+.sh-tools {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  color: #555;
+  font-size: 14px;
+}
+.sh-tools button {
+  font: inherit;
+  padding: 6px 14px;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #f4f4f4;
+  cursor: pointer;
+}
+
+.sh-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sh-grid li { break-inside: avoid; page-break-inside: avoid; }
+
+.sh-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #eee;
+}
+
+.sh-blank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 6px;
+  background: #f0f0f0;
+  color: #888;
+  font-size: 13px;
+}
+
+/* The name you are trying to recall, large; the family name beneath it, small and grey,
+   the same shape as everywhere else in Kith. */
+.sh-name { display: block; font-weight: 700; margin-top: 6px; }
+.sh-family { display: block; font-size: 0.72em; color: #777; }
+.sh-hook { display: block; font-size: 0.8em; color: #555; font-style: italic; margin-top: 2px; }
+
+@media (max-width: 640px) {
+  .sh-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media print {
+  .sh-tools { display: none; }
+  body { padding: 0; font-size: 12px; }
+  h1 { font-size: 15px; margin-bottom: 8px; }
+  .sh-grid { gap: 10px 8px; }
+  .sh-grid li { border: 0; }
+  @page { size: A4; margin: 12mm; }
+}

@@ -399,4 +399,22 @@ def build_router() -> APIRouter:
             context = stats_repo.overview(conn, db_path=request.app.state.settings.db_path)
         return render(request, "stats.html", nav="stats", **context)
 
+    # ── the sheet you take with you ───────────────────────────────────────────
+    @router.get("/sheet", response_class=HTMLResponse)
+    def sheet(request: Request) -> HTMLResponse:
+        """One printable page: the faces who will be there, and what to call them.
+
+        Made for the hour before a party, which is why it is a page of its own rather than a
+        view of the cabinet: nothing on it but faces and names, no navigation, no controls,
+        and it loads its own stylesheet instead of the app's so that printing is the point.
+        """
+        group_id = _optional_int(request.query_params.get("group"))
+        with session(request) as conn:
+            rows = people_repo.sheet_rows(conn, group_id=group_id)
+            group_name = None
+            if group_id:
+                found = conn.execute("SELECT name FROM grp WHERE id = ?", (group_id,)).fetchone()
+                group_name = found["name"] if found else None
+        return render(request, "sheet.html", rows=rows, group_name=group_name)
+
     return router

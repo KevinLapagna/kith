@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if group_name %}{{ group_name }}{% else %}Everyone{% endif %} — Kith sheet</title>
+<link rel="stylesheet" href="/static/css/sheet.css?v={{ asset_v() }}">
+</head>
+<body>
+<div class="sh-tools">
+  <button type="button" onclick="window.print()">Print</button>
+  <span>{{ rows | length }} {{ 'face' if rows | length == 1 else 'faces' }}</span>
+  <a href="/stats">back to Progress</a>
+</div>
+
+<h1>{% if group_name %}{{ group_name }}{% else %}Everyone{% endif %}</h1>
+
+{% if rows %}
+<ul class="sh-grid">
+  {% for person in rows %}
+  <li>
+    {% if person.photo_id %}
+    <img src="/photos/{{ person.photo_id }}.webp?size=full" alt="">
+    {% else %}
+    <span class="sh-blank">no photo</span>
+    {% endif %}
+    <span class="sh-name">{{ person.asked_name }}</span>
+    {% if person.family_name %}<span class="sh-family">{{ person.family_name }}</span>{% endif %}
+    {% if person.mnemonic %}<span class="sh-hook">{{ person.mnemonic }}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>Nobody here yet.</p>
+{% endif %}
+</body>
+</html>

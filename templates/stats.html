@@ -81,7 +81,8 @@
     <tbody>
       {% for group in groups %}
       <tr>
-        <td><a href="/groups/{{ group.id }}">{{ group.name }}</a></td>
+        <td><a href="/groups/{{ group.id }}">{{ group.name }}</a>
+          · <a href="/sheet?group={{ group.id }}" title="Printable sheet of this group">sheet</a></td>
         <td class="pg-muted">{{ group.known }} / {{ group.members }}{% if group.due %} · {{ group.due }} due{% endif %}</td>
         <td><span class="pg-meter"><span style="--fill: {{ group.rate or 0 }}"></span></span></td>
         <td class="pg-muted">
@@ -94,6 +95,45 @@
   {% else %}
   <p class="pg-muted">No groups yet — a group is the quickest way to say "the people from work".</p>
   {% endif %}
+</section>
+
+{# ── your data ────────────────────────────────────────────────────────────── #}
+<section class="pg-card">
+  <h2>Your data</h2>
+  {% set data_state = request.query_params.get('data') %}
+  {% if data_state == 'imported' %}
+  <p><strong>Cabinet replaced.</strong> The database it replaced was kept beside it as
+    <code>replaced-*.sqlite</code>, so this is undoable by hand if it was the wrong file.</p>
+  {% elif data_state %}
+  <p><strong>{{
+    {'confirm': 'Nothing was replaced: the word REPLACE was not typed.',
+     'nofile': 'Nothing was replaced: no file arrived.',
+     'notsqlite': 'Nothing was replaced: that file is not a SQLite database.',
+     'corrupt': 'Nothing was replaced: that database failed its integrity check.',
+     'version': 'Nothing was replaced: that database was written by a different Kith schema.',
+     'tables': 'Nothing was replaced: that database is missing Kith tables.',
+     'huge': 'Nothing was replaced: that file is larger than 1 GB.'}.get(data_state,
+     'Nothing was replaced.') }}</strong></p>
+  {% endif %}
+  <p class="pg-muted">
+    Everything Kith knows — every person, every photo, every review — lives in a single SQLite
+    file, which is why the backup <em>is</em> the export. Take a copy before a restore, and
+    every so often for no better reason than that it takes one click.
+  </p>
+  <p><a href="/api/backup">Download the database</a></p>
+  <p><a href="/sheet">Printable sheet — everyone</a></p>
+  <details>
+    <summary>Restore from a copy</summary>
+    <p class="pg-muted">
+      This replaces everything currently in the cabinet, and only a file that is a readable
+      Kith database on this schema will be accepted. Whatever it replaces is snapshotted first.
+    </p>
+    <form method="post" action="/api/import" enctype="multipart/form-data">
+      <p><input type="file" name="database" accept=".sqlite,application/vnd.sqlite3"></p>
+      <p><input type="text" name="confirm" placeholder="type REPLACE" autocomplete="off"></p>
+      <p><button type="submit">Replace the cabinet</button></p>
+    </form>
+  </details>
 </section>
 
 {# ── the pairs ────────────────────────────────────────────────────────────── #}
