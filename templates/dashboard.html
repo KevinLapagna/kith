@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% block title %}Kith — status{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>{% if s.ok %}Ready.{% else %}Attention needed.{% endif %}</h1>
+  <p class="lede">
+    {% if s.ok %}
+      Storage, schema and write access all check out. The cabinet holds the people and
+      their photos; the trainer that drills them arrives in M2.
+    {% else %}
+      Something in the storage layer is not healthy — the details below say which part.
+      This page is deliberately blunt because a half-working database is worse than a
+      stopped one.
+    {% endif %}
+  </p>
+</section>
+
+{% if s.error %}
+<section class="card error">
+  <h2>Last error</h2>
+  <pre class="mono">{{ s.error }}</pre>
+</section>
+{% endif %}
+
+<section class="grid">
+  <article class="card">
+    <h2>Database</h2>
+    <dl class="kv">
+      <dt>Status</dt><dd>{% if s.ok %}<span class="badge ok">healthy</span>{% else %}<span class="badge bad">degraded</span>{% endif %}</dd>
+      <dt>Writable</dt><dd>{% if s.db_writable %}<span class="badge ok">yes</span>{% else %}<span class="badge bad">no</span>{% endif %}</dd>
+      <dt>Schema</dt><dd class="mono">{{ s.schema }} <span class="muted">of {{ s.expected_schema }}</span></dd>
+      <dt>Journal</dt><dd class="mono">{{ s.pragma.journal_mode or "—" }}</dd>
+      <dt>Integrity</dt><dd class="mono">{{ s.pragma.integrity or "—" }}</dd>
+      <dt>File</dt><dd class="mono small path">{{ s.db_path | breakable_path }}</dd>
+    </dl>
+  </article>
+
+  <article class="card">
+    <h2>Cabinet</h2>
+    <dl class="kv">
+      <dt>Active</dt><dd class="mono">{{ stats.active }}</dd>
+      <dt>Paused</dt><dd class="mono">{{ stats.paused }}</dd>
+      <dt>Archived</dt><dd class="mono">{{ stats.archived }}</dd>
+      <dt>Trainable</dt><dd class="mono">{{ stats.trainable }} <span class="muted">with a photo</span></dd>
+      <dt>No photo yet</dt><dd class="mono">{{ stats.without_photos }}</dd>
+      <dt>Photos</dt><dd class="mono">{{ stats.photos }} · {{ (stats.photo_bytes / 1048576) | round(1) }} MB</dd>
+    </dl>
+    <p><a class="btn primary" href="/cabinet">Open the cabinet</a></p>
+  </article>
+
+  <article class="card">
+    <h2>Runtime</h2>
+    <dl class="kv">
+      <dt>App</dt><dd>{{ s.app }} <span class="mono">{{ s.version }}</span></dd>
+      <dt>SQLite</dt><dd class="mono">{{ s.sqlite }}</dd>
+      <dt>Uptime</dt><dd class="mono">{{ s.uptime_s }} s</dd>
+      <dt>Timezone</dt><dd class="mono">{{ s.display_tz }} <span class="muted">(storage is UTC)</span></dd>
+      <dt>Login gate</dt><dd>{% if s.auth_enabled %}<span class="badge ok">on</span>{% else %}<span class="badge warn">off</span>{% endif %}</dd>
+      <dt>Data dir</dt><dd class="mono small path">{{ s.data_dir | breakable_path }}</dd>
+    </dl>
+  </article>
+
+  <article class="card">
+    <h2>Groups</h2>
+    {% if groups %}
+    <ul class="plain">
+      {% for group in groups[:6] %}
+      <li><a href="/groups/{{ group.id }}">{{ group.name }}</a>
+          <span class="muted small">{{ group.members }}</span></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted small">
+      Groups let you train on a subset — one side of the family, a project team, or
+      exactly the people you keep mixing up.
+    </p>
+    {% endif %}
+    <p><a class="btn ghost" href="/groups">Manage groups</a></p>
+  </article>
+</section>
+
+<section class="card note">
+  <h2>M1 — the cabinet</h2>
+  <p>People, photos, groups and search, plus the login gate that makes this safe to put
+    behind the house reverse proxy. Photos are downscaled on import and their metadata
+    is dropped before they touch the database.</p>
+  <ul class="roadmap">
+    <li class="done"><strong>M0</strong> container, migrations, health</li>
+    <li class="done"><strong>M1</strong> cabinet: people, photos, groups, search, login</li>
+    <li><strong>M2</strong> trainer: sessions, modes, verdicts</li>
+    <li><strong>M3</strong> scheduler &amp; selection engine</li>
+    <li><strong>M4</strong> stats, cheat sheet, backup, PWA</li>
+  </ul>
+</section>
+{% endblock %}

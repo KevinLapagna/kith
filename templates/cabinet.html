@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% from "_name.html" import person_name %}
+{% block title %}Cabinet — Kith{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>The cabinet</h1>
+  <a class="btn primary" href="/people/new">Add someone</a>
+</div>
+
+<form class="toolbar" method="get" action="/cabinet" role="search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search names, notes, mnemonics…"
+         aria-label="Search people" autocomplete="off" autocapitalize="off" spellcheck="false"
+         enterkeyhint="search">
+  <select name="group" aria-label="Filter by group">
+    <option value="">Everyone</option>
+    {% for item in groups %}
+    <option value="{{ item.id }}" {% if group == item.id %}selected{% endif %}>
+      {{ item.name }} ({{ item.members }})
+    </option>
+    {% endfor %}
+  </select>
+  <select name="status" aria-label="Filter by status">
+    {% for option in ['active', 'paused', 'archived', ''] %}
+    <option value="{{ option }}" {% if status == option %}selected{% endif %}>
+      {{ option or 'any status' }}
+    </option>
+    {% endfor %}
+  </select>
+  <button class="btn" type="submit">Filter</button>
+</form>
+
+{# Everything below the toolbar is one swapped region (static/js/live-search.js replaces
+   its contents while you type), so the count, the Clear link and the list itself can
+   never disagree with each other. Without JavaScript the form submits as usual and the
+   server renders this same markup. #}
+<div id="results" data-results>
+  <p class="muted small">
+    {{ people|length }} shown · {{ stats.trainable }} trainable
+    {% if stats.without_photos %} · {{ stats.without_photos }} without a photo{% endif %}
+    · {{ stats.photos }} photos · {{ (stats.photo_bytes / 1048576)|round(1) }} MB
+    {% if q or group or status != 'active' %}
+    <a class="btn ghost small" href="/cabinet">Clear</a>
+    {% endif %}
+  </p>
+
+  {% if people %}
+  <div class="people">
+    {% for person in people %}
+    <a class="person {% if person.status != 'active' %}is-off{% endif %}" href="/people/{{ person.id }}">
+      <span class="shot">
+        {% if person.photo_id %}
+          <img src="/photos/{{ person.photo_id }}/thumb.webp" alt="" loading="lazy" width="256" height="256">
+        {% else %}
+          <span class="initial">{{ person.display_name[:1]|upper }}</span>
+        {% endif %}
+      </span>
+      <span class="meta">
+        <span class="name">{{ person_name(person) }}</span>
+        <span class="sub">
+          {% if person.nickname %}{{ person.nickname }}
+          {% elif person.where_met %}{{ person.where_met }}
+          {% elif not person.photo_id %}no photo yet
+          {% endif %}
+        </span>
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    {% if q or group or status != 'active' %}
+      <p>Nobody matches that.</p>
+      <p><a class="btn ghost" href="/cabinet">Clear the filters</a></p>
+    {% else %}
+      <p>The cabinet is empty.</p>
+      <p><a class="btn primary" href="/people/new">Add the first person</a></p>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

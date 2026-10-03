@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Kith{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/kith.css?v={{ asset_v() }}">
+  <link rel="stylesheet" href="/static/css/trainer.css?v={{ asset_v() }}">
+  <script src="/static/js/live-search.js?v={{ asset_v() }}" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="wordmark" href="/">Kith<span class="dot">.</span></a>
+      <span class="tagline">names &amp; faces</span>
+      <nav class="nav">
+        <a class="pill {% if nav == 'cabinet' %}is-active{% endif %}" href="/cabinet">Cabinet</a>
+        <a class="pill {% if nav == 'groups' %}is-active{% endif %}" href="/groups">Groups</a>
+        <a class="pill {% if nav == 'train' %}is-active{% endif %}" href="/train">Train</a>
+        <a class="pill {% if nav == 'status' %}is-active{% endif %}" href="/">Status</a>
+        {% if s.auth_enabled %}
+        <form class="inline" method="post" action="/logout">
+          <button class="pill" type="submit">Sign out</button>
+        </form>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% if notice_ok %}<p class="notice ok">{{ notice_ok }}</p>{% endif %}
+    {% if notice_err %}<p class="notice err">{{ notice_err }}</p>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="wrap foot">
+    <span>{{ s.app }} {{ s.version }} · schema {{ s.expected_schema }} · SQLite {{ s.sqlite }}</span>
+    <span>
+      {% if s.auth_enabled %}password required{% else %}single user · loopback only{% endif %}
+      · one file · nothing leaves this machine
+    </span>
+  </footer>
+</body>
+</html>

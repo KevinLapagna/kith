@@ -1,0 +1,125 @@
+/* The board: faces to drop a name on, names to drag. Sized for a thumb and a mouse alike.
+ *
+ * `touch-action: none` on a chip is what lets a finger drag it: without it the browser claims
+ * the gesture for scrolling and the chip never moves.
+ */
+
+.board {
+  display: grid;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.board-faces {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 0.6rem;
+}
+
+.board-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.face-slot {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: var(--surface-2, #222);
+  border: 2px dashed transparent;
+}
+
+.face-slot.filled {
+  border-color: var(--accent, #6cf);
+}
+
+.face-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.face-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  opacity: 0.35;
+}
+
+.face-slot.filled .face-empty {
+  display: none;
+}
+
+.face-hit {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.name-chip {
+  font: inherit;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--line, #444);
+  background: var(--surface-1, #1a1a1a);
+  color: inherit;
+  cursor: grab;
+  touch-action: none;
+}
+
+.name-chip.held {
+  outline: 2px solid var(--accent, #6cf);
+  outline-offset: 2px;
+}
+
+.face-slot .name-chip {
+  position: absolute;
+  left: 0.3rem;
+  right: 0.3rem;
+  bottom: 0.3rem;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.8rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.name-chip.ghost {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.9;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.45);
+}
+
+.name-chip.dragging {
+  opacity: 0.4;
+}
+
+.board-results {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.board-results li.right {
+  color: var(--ok, #6c9);
+}
+
+.board-results li.wrong {
+  color: var(--err, #e88);
+}
+
+.board-slip {
+  opacity: 0.85;
+}

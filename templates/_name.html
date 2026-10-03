@@ -1,0 +1,4 @@
+{# How the app writes a person's name. What you are asked leads; the family name follows in a
+   lighter, smaller weight so it is absorbed on the side rather than tested for. It is skipped
+   when it is already part of the asked name, so "Rafa Nadal" never renders as "Rafa Nadal Nadal". #}
+{% macro person_name(person) %}{{ person.display_name }}{% if person.family_name and person.family_name|lower not in person.display_name|lower %} <span class="name-family">{{ person.family_name }}</span>{% endif %}{% endmacro %}

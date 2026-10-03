@@ -1,0 +1,7 @@
+# Kith — name & face trainer. Loopback upstream, no basic_auth on purpose: the app owns
+# its login gate (KITH_AUTH=on + scrypt), which is Kevin's convention for these hosts.
+# Install to /etc/caddy/Caddyfile.d/kith.barn.opq.ch.caddyfile (mode 644, root:root);
+# the main Caddyfile pulls this directory in with `import Caddyfile.d/*.caddyfile`.
+kith.barn.opq.ch {
+	reverse_proxy 127.0.0.1:8080
+}

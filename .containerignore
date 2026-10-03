@@ -1,0 +1,17 @@
+# Keep the build context small and — more importantly — keep personal data out of
+# any image layer. A build must never be able to bake your photos in.
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+.git/
+.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+tests/
+*.md
+kith.env
+.env
+secrets/

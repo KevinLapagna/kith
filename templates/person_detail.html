@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% block title %}{{ person.display_name }} — Kith{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>
+    {{ person.display_name }}
+    {% if person.status != 'active' %}<span class="badge warn">{{ person.status }}</span>{% endif %}
+  </h1>
+  <a class="btn ghost" href="/cabinet">Back to the cabinet</a>
+</div>
+
+{% if person.nickname or person.where_met or person.met_on %}
+<p class="lede">
+  {% if person.nickname %}“{{ person.nickname }}”{% endif %}
+  {% if person.where_met %} · met {{ person.where_met }}{% endif %}
+  {% if person.met_on %} · {{ person.met_on }}{% endif %}
+</p>
+{% endif %}
+
+{% if member_of %}
+<p class="chips">
+  {% for group in groups %}{% if group.id in member_of %}
+    <a class="chip" href="/groups/{{ group.id }}">{{ group.name }}</a>
+  {% endif %}{% endfor %}
+</p>
+{% endif %}
+
+<section class="card">
+  <h2>Photos <span class="muted small">{{ photos|length }}</span></h2>
+
+  {% if photos %}
+  <div class="shots">
+    {% for photo in photos %}
+    <figure class="shot-card {% if photo.is_primary %}is-primary{% endif %}">
+      <img src="/photos/{{ photo.id }}.webp" alt="{{ person.display_name }}" loading="lazy"
+           width="{{ photo.width }}" height="{{ photo.height }}">
+      <figcaption class="bar">
+        <span class="muted small">{{ photo.width }}×{{ photo.height }} · {{ (photo.bytes / 1024)|round|int }} KB</span>
+        {% if photo.is_primary %}
+          <span class="badge ok">primary</span>
+        {% else %}
+          <span class="bar-actions">
+            <form method="post" action="/people/{{ person.id }}/photos/{{ photo.id }}/primary">
+              <button class="btn tiny" type="submit">Make primary</button>
+            </form>
+            <form method="post" action="/people/{{ person.id }}/photos/{{ photo.id }}/delete"
+                  onsubmit="return confirm('Delete this photo?')">
+              <button class="btn tiny danger" type="submit">Delete</button>
+            </form>
+          </span>
+        {% endif %}
+      </figcaption>
+      {% if photo.is_primary %}
+      <form class="bar" method="post" action="/people/{{ person.id }}/photos/{{ photo.id }}/delete"
+            onsubmit="return confirm('Delete this photo?')">
+        <button class="btn tiny danger" type="submit">Delete</button>
+      </form>
+      {% endif %}
+    </figure>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="muted">
+    No photos yet — and without one, this person cannot appear in a training run.
+  </p>
+  {% endif %}
+
+  <form class="upload" method="post" action="/people/{{ person.id }}/photos"
+        enctype="multipart/form-data">
+    <label for="photos">Add photos <span class="muted small">(several at once is fine; they are downscaled and cleared of metadata)</span></label>
+    <input id="photos" name="photos" type="file" accept="image/*" multiple>
+    <button class="btn" type="submit">Upload</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Details</h2>
+  {% if error %}<p class="notice err">{{ error }}</p>{% endif %}
+  <form method="post" action="/people/{{ person.id }}">
+    {% include "_person_fields.html" %}
+    <button class="btn primary" type="submit">Save changes</button>
+  </form>
+</section>
+
+<section class="danger-zone">
+  <h2>Remove</h2>
+  <p class="muted small">
+    Deleting a person also removes their photos, group memberships and review history.
+    There is no undo — the database is the only copy.
+  </p>
+  <form method="post" action="/people/{{ person.id }}/delete"
+        onsubmit="return confirm('Delete {{ person.display_name }} and all their photos?')">
+    <button class="btn danger" type="submit">Delete {{ person.display_name }}</button>
+  </form>
+</section>
+{% endblock %}

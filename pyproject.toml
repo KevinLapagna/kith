@@ -1,0 +1,6 @@
+# Test configuration only — Kith is not a distributable package, so there is no
+# [project] table here. Runtime dependencies live in requirements.txt (hash-locked).
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q --strict-markers"

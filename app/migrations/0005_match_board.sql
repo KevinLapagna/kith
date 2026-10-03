@@ -1,0 +1,14 @@
+-- M4b: a match board asks about several people in one item.
+--
+-- `card_id` still names the item's target — the face the board is built around, and the one the
+-- ladder chose — but a board is graded for every member of the board, so the roster has to be
+-- part of the item rather than recomputed at answer time. Recomputing it would be wrong in a way
+-- that is hard to see: the companions are picked with the same "confusable, prefer same group"
+-- rule the distractor picker uses, it reads what has recently been asked, and a study card
+-- requeued earlier in the queue would shift that choice — so the board you answered could differ
+-- from the board you were shown.
+--
+-- A JSON array of {"person_id": int, "card_id": int|null}, target first. `card_id` is null for a
+-- companion who has no card on this axis yet: they are a perfectly good face to tell apart, but
+-- writing a review for someone who has never been introduced would schedule a stranger.
+ALTER TABLE session_item ADD COLUMN people TEXT;

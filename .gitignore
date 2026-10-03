@@ -1,0 +1,20 @@
+# Personal data and secrets never belong in the repo — a commit must not be able
+# to carry your photos or the gate's password away with it.
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+kith.env
+.env
+secrets/
+
+# Dev environment and caches.
+.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# OS noise.
+.DS_Store

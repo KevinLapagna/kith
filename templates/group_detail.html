@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+{% from "_name.html" import person_name %}
+{% block title %}{{ group.name }} — Kith{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ group.name }}</h1>
+  <a class="btn ghost" href="/groups">All groups</a>
+</div>
+<p class="muted small">{{ group.members }} {{ 'person' if group.members == 1 else 'people' }}</p>
+
+{% if error %}<p class="notice err">{{ error }}</p>{% endif %}
+
+<form class="card" method="post" action="/groups/{{ group.id }}">
+  <h2>Name &amp; members</h2>
+  <div class="row">
+    <div class="field">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" required maxlength="80" value="{{ group.name }}">
+    </div>
+    <div class="field">
+      <label for="note">Note</label>
+      <input id="note" name="note" type="text" value="{{ group.note or '' }}">
+    </div>
+  </div>
+
+  {% if candidates %}
+  <fieldset class="fieldset">
+    <legend>Members</legend>
+    <div class="checklist">
+      {% for person in candidates %}
+      <label>
+        <input type="checkbox" name="members" value="{{ person.id }}"
+               {% if person.id in member_ids %}checked{% endif %}>
+        <span>
+          {{ person_name(person) }}
+          {% if not person.photo_id %}<span class="muted small">no photo</span>{% endif %}
+        </span>
+      </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+  {% else %}
+  <p class="muted small">Nobody in the cabinet yet — <a href="/people/new">add someone</a> first.</p>
+  {% endif %}
+
+  <button class="btn primary" type="submit">Save group</button>
+</form>
+
+{% if members %}
+<section class="card">
+  <h2>In this group</h2>
+  <div class="people">
+    {% for person in members %}
+    <a class="person {% if person.status != 'active' %}is-off{% endif %}" href="/people/{{ person.id }}">
+      <span class="shot">
+        {% if person.photo_id %}
+          <img src="/photos/{{ person.photo_id }}/thumb.webp" alt="" loading="lazy" width="256" height="256">
+        {% else %}
+          <span class="initial">{{ person.display_name[:1]|upper }}</span>
+        {% endif %}
+      </span>
+      <span class="meta">
+        <span class="name">{{ person_name(person) }}</span>
+        <span class="sub">{% if not person.has_photo %}no photo yet{% endif %}</span>
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="danger-zone">
+  <h2>Remove</h2>
+  <p class="muted small">Deleting a group removes only the grouping — the people stay in the cabinet.</p>
+  <form method="post" action="/groups/{{ group.id }}/delete"
+        onsubmit="return confirm('Delete the group {{ group.name }}?')">
+    <button class="btn danger" type="submit">Delete group</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block title %}Not found — Kith{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Not found</h1></div>
+<div class="empty">
+  <p>There is no {{ what or 'page' }} here. It may have been deleted.</p>
+  <p><a class="btn ghost" href="/cabinet">Back to the cabinet</a></p>
+</div>
+{% endblock %}

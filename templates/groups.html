@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}Groups — Kith{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Groups</h1>
+</div>
+<p class="lede">
+  Groups are just sets of people to train on — they overlap freely, and one person can
+  sit in as many as you like. A group is what a training run is drawn from.
+</p>
+
+{% if error %}<p class="notice err">{{ error }}</p>{% endif %}
+
+<section class="card">
+  <h2>New group</h2>
+  <form method="post" action="/groups">
+    <div class="row">
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" required maxlength="80"
+               placeholder="Fabienne's family" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="note">Note <span class="muted">(optional)</span></label>
+        <input id="note" name="note" type="text" placeholder="who they are to you" autocomplete="off">
+      </div>
+    </div>
+    <button class="btn primary" type="submit">Create group</button>
+  </form>
+</section>
+
+{% if groups %}
+<div class="groups">
+  {% for group in groups %}
+  <div class="group">
+    <h3><a href="/groups/{{ group.id }}">{{ group.name }}</a></h3>
+    <p class="count">{{ group.members }} {{ 'person' if group.members == 1 else 'people' }}</p>
+    {% if group.note %}<p class="muted small">{{ group.note }}</p>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="muted">No groups yet. You can still train on everyone once the trainer arrives.</p>
+{% endif %}
+{% endblock %}

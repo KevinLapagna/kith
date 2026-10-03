@@ -1,0 +1,136 @@
+/* Kith — the trainer's stylesheet.
+   The cabinet is quiet; this is the loud screen, so it lives in its own file. It also
+   carries the handful of shared bits (panels, stats, tables) that only the training
+   screens use. Same rules as the main sheet: hand-written, no framework, no build step. */
+
+/* ── shared bits ─────────────────────────────────────────────────────────── */
+.panel {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 1.1rem 1.2rem; margin-bottom: 1rem;
+}
+.panel h2 {
+  margin: 0 0 .7rem; font-size: .78rem; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--muted);
+}
+.hint { color: var(--muted); font-size: .85rem; margin: .2rem 0 .8rem; }
+.btn.small { padding: .3rem .7rem; font-size: .85rem; }
+.btn.big { padding: .85rem 1.4rem; font-size: 1.05rem; }
+
+.stats { display: flex; gap: 1.4rem; flex-wrap: wrap; margin: 0 0 1rem; }
+.stats dt {
+  font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+}
+.stats dd { margin: .15rem 0 0; font-size: 1.45rem; font-variant-numeric: tabular-nums; }
+
+.table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.table th, .table td { text-align: left; padding: .4rem .5rem; border-bottom: 1px solid var(--line); }
+.table td.num, .table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.plain { list-style: none; margin: 0; padding: 0; }
+.plain li {
+  padding: .35rem 0; border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+}
+.when { color: var(--muted); font-size: .82rem; font-family: var(--mono); white-space: nowrap; }
+.inline-form { margin-top: .9rem; }
+
+/* ── the builder ─────────────────────────────────────────────────────────── */
+.fields {
+  display: grid; gap: .8rem; margin-bottom: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+.modes { list-style: none; margin: 0 0 1rem; padding: 0; }
+.modes .mode label {
+  display: flex; align-items: center; gap: .6rem; padding: .55rem .2rem;
+  border-bottom: 1px solid var(--line); cursor: pointer;
+}
+.modes .mode:last-child label { border-bottom: 0; }
+.modes .mode.is-out label { opacity: .55; cursor: not-allowed; }
+.mode-label { font-weight: 500; }
+.why { margin-left: auto; font-size: .78rem; color: var(--muted); }
+
+/* ── the session screen ──────────────────────────────────────────────────── */
+.trainer { max-width: 46rem; margin: 0 auto; }
+.trainer-top { display: flex; align-items: center; gap: .8rem; margin: .3rem 0 1.2rem; }
+.progress {
+  flex: 1; height: .5rem; border-radius: 999px; overflow: hidden;
+  background: color-mix(in srgb, var(--line) 70%, transparent);
+}
+.progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .25s ease; }
+.progress-text {
+  font-size: .84rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+.stage { min-height: 18rem; }
+.ask { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+
+.photo.big {
+  width: 100%; max-width: 22rem; aspect-ratio: 1 / 1; overflow: hidden;
+  border-radius: var(--radius); background: color-mix(in srgb, var(--line) 55%, transparent);
+}
+.photo.big img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-missing {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; color: var(--muted);
+}
+
+.prompt { margin: 0; font-size: 1.05rem; color: var(--muted); text-align: center; }
+
+.options, .ratings {
+  list-style: none; margin: 0; padding: 0; width: 100%;
+  display: grid; gap: .5rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+.option, .rate {
+  display: flex; align-items: center; gap: .6rem; width: 100%; text-align: left;
+  padding: .85rem 1rem; font: inherit; font-size: 1rem; cursor: pointer;
+  background: var(--panel); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--radius);
+}
+.option:hover, .rate:hover, .option:focus-visible, .rate:focus-visible { border-color: var(--accent); }
+.key {
+  font-family: var(--mono); font-size: .75rem; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 6px; padding: .05rem .35rem;
+}
+.rate-1 { border-color: color-mix(in srgb, var(--bad-ink) 35%, var(--line)); }
+.rate-4 { border-color: color-mix(in srgb, var(--ok-ink) 35%, var(--line)); }
+
+.reveal, .study-card { text-align: center; }
+.reveal-name, .study-name { margin: 0; font-size: 1.6rem; font-weight: 600; }
+.mnemonic { margin: .3rem 0 0; font-style: italic; }
+.meta { margin: .2rem 0 0; color: var(--muted); font-size: .88rem; }
+
+.hints { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: center; }
+.hint-chip {
+  border: 1px solid var(--line); border-radius: 999px; padding: .25rem .7rem;
+  font-family: var(--mono); font-size: .9rem; background: var(--panel);
+}
+
+.again-badge {
+  align-self: flex-start; font-size: .72rem; text-transform: uppercase;
+  letter-spacing: .08em; padding: .15rem .6rem; border-radius: 999px;
+  color: var(--warn-ink); background: var(--warn-bg);
+}
+
+.feedback { margin-top: 1.3rem; display: flex; flex-direction: column; gap: .7rem; align-items: flex-start; }
+.verdict-line { margin: 0; font-weight: 600; }
+.verdict.wrong .verdict-line { color: var(--bad-ink); }
+.verdict.right { color: var(--ok-ink); font-size: 1.3rem; line-height: 1; }
+
+/* A wrong answer flashes red — the one piece of theatre in the whole app. */
+@keyframes kith-flash { from { background: var(--bad-bg); } to { background: transparent; } }
+.stage.wrong { animation: kith-flash .5s ease-out; }
+.stage.wrong .photo.big { box-shadow: 0 0 0 3px var(--bad-ink); }
+.stage.right .photo.big { box-shadow: 0 0 0 3px var(--ok-ink); }
+
+.keys { text-align: center; margin-top: 1.6rem; }
+kbd {
+  font-family: var(--mono); font-size: .8rem; padding: .05rem .35rem;
+  border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px;
+  background: var(--panel);
+}
+
+@media (max-width: 30rem) {
+  .options, .ratings { grid-template-columns: 1fr; }
+  .photo.big { max-width: 100%; }
+  .stats { gap: 1rem; }
+}

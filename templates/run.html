@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}Training — Kith{% endblock %}
+{% block content %}
+<div class="trainer" id="trainer" data-session="{{ session_id }}">
+  <div class="trainer-top">
+    <div class="progress" role="progressbar" aria-label="Session progress">
+      <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    </div>
+    <span class="progress-text" id="progress-text">starting…</span>
+    <button class="btn small ghost" id="end-session" type="button">End</button>
+  </div>
+
+  {% if mode_labels %}
+  <p class="hint muted small" id="modes-in-play">This run can ask: {{ mode_labels|join(" · ") }}</p>
+  {% endif %}
+
+  <div class="stage" id="stage" aria-live="polite"></div>
+
+  <div class="feedback" id="feedback"></div>
+  <p class="hint keys">Keyboard: <kbd>1</kbd>–<kbd>4</kbd> choose · <kbd>Space</kbd> reveal · <kbd>H</kbd> hint · <kbd>Enter</kbd> continue</p>
+</div>
+
+<noscript>
+  <p class="notice err">The trainer needs JavaScript. Everything else in Kith works without it.</p>
+</noscript>
+
+<link rel="stylesheet" href="/static/css/match.css?v={{ asset_v() }}">
+<script type="application/json" id="kith-bootstrap">{{ bootstrap|safe }}</script>
+<script src="/static/js/match.js?v={{ asset_v() }}" defer></script>
+<script src="/static/js/trainer.js?v={{ asset_v() }}" defer></script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% from "_name.html" import person_name %}
+{% block title %}Session summary — Kith{% endblock %}
+{% block content %}
+<h1>Session summary</h1>
+
+<dl class="stats">
+  <div><dt>answered</dt><dd>{{ counts.answers }}</dd></div>
+  <div><dt>right</dt><dd>{{ counts.correct }}</dd></div>
+  <div><dt>accuracy</dt><dd>{{ accuracy }}%</dd></div>
+  <div><dt>items retired</dt><dd>{{ counts.retired }}/{{ counts.planned }}</dd></div>
+</dl>
+
+{% if look_again %}
+<section class="panel">
+  <h2>Worth a second look</h2>
+  <ul class="plain">
+    {% for row in look_again %}
+      <li>
+        <a href="/cabinet/{{ row.person_id }}">{{ person_name(row) }}</a>
+        — {{ row.correct }}/{{ row.asked }} right{% if row.no_idea %} · {{ row.no_idea }}× “no idea”{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  <form method="post" action="/train" class="inline-form">
+    <input type="hidden" name="people" value="{{ mistake_ids|join(',') }}">
+    <input type="hidden" name="modes" value="study">
+    <input type="hidden" name="modes" value="recall_self">
+    <input type="hidden" name="minutes" value="5">
+    <input type="hidden" name="new_budget" value="0">
+    <button class="btn primary" type="submit">Drill these {{ mistake_ids|length }} again</button>
+  </form>
+</section>
+{% endif %}
+
+<section class="panel">
+  <h2>Everyone in this session</h2>
+  <table class="table">
+    <thead><tr><th>Name</th><th class="num">Asked</th><th class="num">Right</th></tr></thead>
+    <tbody>
+      {% for row in per_person %}
+        <tr>
+          <td><a href="/cabinet/{{ row.person_id }}">{{ person_name(row) }}</a></td>
+          <td class="num">{{ row.asked }}</td>
+          <td class="num">{{ row.correct }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>When they come back</h2>
+  <ul class="plain">
+    {% for row in next_due %}
+      <li>{{ row.display_name }} <span class="when">{{ row.due[:10] }} {{ row.due[11:16] }} UTC</span></li>
+    {% endfor %}
+  </ul>
+  <p class="hint">Spacing is doing the work here: the interval grows as a name sticks, so an easy face quietly disappears from your sessions.</p>
+</section>
+
+<p>
+  <a class="btn primary" href="/train">New session</a>
+  <a class="btn ghost" href="/cabinet">Back to the cabinet</a>
+</p>
+{% endblock %}

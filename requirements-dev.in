@@ -1,0 +1,4 @@
+# Dev/test-only. Never installed into the runtime image.
+-r requirements.in
+pytest
+httpx

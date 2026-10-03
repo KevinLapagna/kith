@@ -1,0 +1,8 @@
+# Kith — direct dependencies. Everything else is transitive and pinned in
+# requirements.txt (generated, hash-locked). Keep this file short.
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
+pillow==12.3.0
+fsrs==6.3.2

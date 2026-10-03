@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+{% block title %}Train — Kith{% endblock %}
+{% block content %}
+<h1>Train</h1>
+
+{% if error %}<p class="notice err">{{ error }}</p>{% endif %}
+
+{% if pool_size == 0 %}
+  <p class="notice">Nothing to train on yet — the cabinet is empty. <a href="/cabinet/new">Add someone first</a>.</p>
+{% else %}
+
+{% if resume and resume_counts and resume_counts.remaining > 0 %}
+  <p class="notice ok">
+    You have an unfinished session ({{ resume_counts.retired }} of {{ resume_counts.planned }} done).
+    <a class="btn small" href="/train/{{ resume.id }}">Resume it</a>
+  </p>
+{% endif %}
+
+<form method="post" action="/train" class="builder">
+  <section class="panel">
+    <h2>What to practise</h2>
+    <p class="hint">Tick what you are willing to be asked — nothing outside this list is ever asked of you. Of the modes you tick, a shaky face is asked the <em>gentlest</em> and a settled one climbs one rung at a time, so ticking both multiple choice and free recall lets a face move up as it settles. Free recall is the hard one; multiple choice needs enough faces in the cabinet to make the options real; the confusion drill is only offered for a pair you have actually mixed up. New faces are always shown to you once before they are tested — that part is not optional.</p>
+    <ul class="modes">
+      {% for mode in all_modes %}
+        {% set usable = mode.key in usable_keys %}
+        <li class="mode {% if not usable %}is-out{% endif %}">
+          <label>
+            <input type="checkbox" name="modes" value="{{ mode.key }}"
+                   {% if mode.key in chosen_modes %}checked{% endif %}
+                   {% if not usable %}disabled{% endif %}>
+            <span class="mode-label">{{ mode.label }}</span>
+            {% if not usable %}
+              <span class="why">needs at least {{ mode.min_people }} people</span>
+            {% endif %}
+          </label>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="panel">
+    <h2>Who</h2>
+    <div class="fields">
+      <label class="field">
+        <span>Everyone from</span>
+        <select name="grp">
+          <option value="" {% if not chosen_grp %}selected{% endif %}>the whole cabinet ({{ pool_size }})</option>
+          {% for group in groups %}
+            <option value="{{ group.id }}" {% if group.id == chosen_grp %}selected{% endif %}>{{ group.name }} ({{ group.members }})</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="field">
+        <span>New faces this session</span>
+        <select name="new_budget">
+          {% for value, label in [(0, "none — just review"), (3, "up to 3"), (5, "up to 5"), (10, "up to 10")] %}
+            <option value="{{ value }}" {% if value == chosen_new_budget %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="field">
+        <span>Length</span>
+        <select name="minutes">
+          {% for value, label in [(5, "about 5 minutes"), (10, "about 10 minutes"), (20, "about 20 minutes"), (30, "about 30 minutes")] %}
+            <option value="{{ value }}" {% if value == chosen_minutes %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="force" value="1" {% if show_force %}checked{% endif %}>
+      <span>Practise anyway — ignore what's due and go over these faces again.
+        <span class="muted small">Nothing is ever lost by it; the schedule just gets an extra look.</span></span>
+    </label>
+    <button class="btn primary" type="submit">Start</button>
+  </section>
+</form>
+
+<section class="panel">
+  <h2>Where things stand</h2>
+  <dl class="stats">
+    <div><dt>due now</dt><dd>{{ card_stats.due }}</dd></div>
+    <div><dt>never seen</dt><dd>{{ card_stats.fresh }}</dd></div>
+    <div><dt>shaky</dt><dd>{{ card_stats.shaky }}</dd></div>
+    <div><dt>cards</dt><dd>{{ card_stats.total }}</dd></div>
+  </dl>
+</section>
+
+{% endif %}
+{% endblock %}
