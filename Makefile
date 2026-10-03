@@ -6,7 +6,7 @@
 #   make run      run the app locally without a container
 #   make build    build the image with Podman
 #   make health   check a running instance
-IMAGE ?= localhost/kith:0.7.0
+IMAGE ?= localhost/kith:0.8.0
 VENV  ?= .venv
 PY    ?= $(VENV)/bin/python
 

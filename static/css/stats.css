@@ -1,0 +1,178 @@
+/* Progress: the one screen that could turn into a scoreboard, so it speaks in capability
+   and contrast instead — how many people you can name, which faces collide, and where your
+   certainty disagrees with your answers. No streaks, no points, no guilt.
+
+   Every colour here is `currentColor` at some opacity, so the page inherits whatever theme
+   the rest of the app is wearing rather than inventing a palette of its own. */
+
+.pg-card {
+  border: 1px solid rgba(128, 128, 128, .28);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  margin: 0 0 1rem;
+}
+
+.pg-card h2 {
+  margin: 0 0 .55rem;
+  font-size: .76rem;
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  opacity: .55;
+}
+
+.pg-big {
+  margin: 0 0 .35rem;
+  font-size: 1.35rem;
+  line-height: 1.35;
+}
+
+.pg-muted {
+  margin: 0;
+  font-size: .88rem;
+  line-height: 1.55;
+  opacity: .68;
+}
+
+.pg-muted + .pg-muted,
+.pg-big + .pg-muted {
+  margin-top: .35rem;
+}
+
+/* ── the thirty-day bars ──────────────────────────────────────────────────── */
+.pg-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 64px;
+  margin: .85rem 0 .1rem;
+}
+
+.pg-bar {
+  flex: 1 1 0;
+  height: calc(var(--h, 0) * 100%);
+  min-height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: .32;
+}
+
+.pg-bar:hover {
+  opacity: .75;
+}
+
+/* ── meters (coverage, difficulty) ────────────────────────────────────────── */
+.pg-meter {
+  display: inline-block;
+  width: 8rem;
+  max-width: 100%;
+  height: .5rem;
+  border-radius: 99px;
+  background: rgba(128, 128, 128, .22);
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.pg-meter > span {
+  display: block;
+  width: calc(var(--fill, 0) * 100%);
+  height: 100%;
+  background: currentColor;
+  opacity: .5;
+}
+
+.pg-buckets {
+  display: grid;
+  gap: .3rem;
+  margin-top: .5rem;
+}
+
+.pg-bucket {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr 2.5rem;
+  align-items: center;
+  gap: .6rem;
+  font-size: .88rem;
+}
+
+.pg-bucket .pg-meter {
+  width: 100%;
+}
+
+/* ── tables and lists ─────────────────────────────────────────────────────── */
+.pg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .92rem;
+  margin-top: .35rem;
+}
+
+.pg-table th {
+  padding: 0 .7rem .3rem 0;
+  text-align: left;
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  opacity: .5;
+}
+
+.pg-table td {
+  padding: .32rem .7rem .32rem 0;
+  border-top: 1px solid rgba(128, 128, 128, .18);
+  vertical-align: middle;
+}
+
+.pg-pairs {
+  margin: .2rem 0 .5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.pg-pairs li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .35rem 0;
+  border-top: 1px solid rgba(128, 128, 128, .18);
+}
+
+/* ── the calibration 2×2 ──────────────────────────────────────────────────── */
+.pg-grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  gap: .5rem;
+  margin: .3rem 0 .7rem;
+}
+
+.pg-cell {
+  border: 1px solid rgba(128, 128, 128, .25);
+  border-radius: 8px;
+  padding: .5rem .65rem;
+}
+
+.pg-cell b {
+  display: block;
+  margin: .1rem 0 .15rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.pg-cell .pg-muted {
+  font-size: .78rem;
+}
+
+/* ── phone and paper ──────────────────────────────────────────────────────── */
+@media (max-width: 30rem) {
+  .pg-table th:nth-child(3),
+  .pg-table td:nth-child(3) {
+    display: none; /* the meter is decoration; the numbers beside it are the content */
+  }
+}
+
+@media print {
+  .pg-card {
+    break-inside: avoid;
+    border-color: #999;
+  }
+}

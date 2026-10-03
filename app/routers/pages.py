@@ -23,6 +23,7 @@ from app import db, images
 from app.repo import groups as groups_repo
 from app.repo import people as people_repo
 from app.repo import photos as photos_repo
+from app.repo import stats as stats_repo
 
 UPLOAD_ERRORS = {
     "not_an_image": "That file is not an image Kith can read.",
@@ -384,5 +385,18 @@ def build_router() -> APIRouter:
         with session(request) as conn:
             groups_repo.delete(conn, group_id)
         return RedirectResponse("/groups", status_code=303)
+
+    # ── progress: what the review log knows ───────────────────────────────────
+    @router.get("/stats", response_class=HTMLResponse)
+    def progress(request: Request) -> HTMLResponse:
+        """Everything the log can tell you, recomputed on every visit.
+
+        Deliberately quiet, and deliberately about *capability* rather than activity: how
+        many people you can now name, which faces you keep swapping, and where your own
+        sense of certainty disagrees with your answers. No streaks, no points, no guilt.
+        """
+        with session(request) as conn:
+            context = stats_repo.overview(conn, db_path=request.app.state.settings.db_path)
+        return render(request, "stats.html", nav="stats", **context)
 
     return router

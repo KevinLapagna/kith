@@ -1,0 +1,183 @@
+{% extends "layout.html" %}
+{% block title %}Progress · Kith{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="/static/css/stats.css?v={{ asset_v() }}">
+{% endblock %}
+
+{% block content %}
+<h1>Progress</h1>
+
+{# ── capability, not activity ─────────────────────────────────────────────── #}
+<section class="pg-card">
+  {% if knowledge.trainable %}
+  <p class="pg-big">
+    You can name <strong>{{ knowledge.known }}</strong> of {{ knowledge.trainable }}
+    {{ 'person' if knowledge.trainable == 1 else 'people' }}.
+  </p>
+  <p class="pg-muted">
+    A face counts as known once you could name it after a month away — currently
+    {{ (knowledge.rate * 100) | round | int }} % of the cabinet.
+    {{ knowledge.cards }} {{ 'card' if knowledge.cards == 1 else 'cards' }} in all,
+    {{ knowledge.suspended }} suspended.
+  </p>
+  {% else %}
+  <p class="pg-big">Nothing to train on yet.</p>
+  <p class="pg-muted">Add a person with a photo and this page starts counting.</p>
+  {% endif %}
+</section>
+
+{# ── the last thirty days ─────────────────────────────────────────────────── #}
+<section class="pg-card">
+  <h2>The last {{ retention.days }} days</h2>
+  {% if retention.answered %}
+  <p class="pg-muted">
+    {{ retention.answered }} answers over {{ retention.active_days }}
+    {{ 'day' if retention.active_days == 1 else 'days' }},
+    {{ retention.correct }} of them right —
+    {{ (retention.rate * 100) | round | int }} %.
+    That is a floor rather than a flattering number: every hard day is in it.
+  </p>
+  <div class="pg-bars" role="img"
+       aria-label="Answers per day over the last {{ retention.days }} days, peaking at {{ peak }}">
+    {% for day in series %}
+    <span class="pg-bar" style="--h: {{ (day.answered / peak) if peak else 0 }}"
+          title="{{ day.day }} — {{ day.answered }} {{ 'answer' if day.answered == 1 else 'answers' }}{% if day.answered %}, {{ day.correct }} right{% endif %}"></span>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="pg-muted">Nothing answered yet.</p>
+  {% endif %}
+</section>
+
+{# ── where the effort sits ────────────────────────────────────────────────── #}
+{% if knowledge.cards %}
+<section class="pg-card">
+  <h2>How hard the cabinet is</h2>
+  <p class="pg-muted">
+    Scheduler difficulty, 1 to 10, over cards you have actually answered. A cabinet piling
+    up on the right means a lot of faces that need a lot of reminding.
+  </p>
+  <div class="pg-buckets">
+    {% set most = difficulty | map(attribute='cards') | max %}
+    {% for bucket in difficulty %}
+    <span class="pg-bucket">
+      <span class="pg-muted">{{ bucket.low }}–{{ bucket.high }}</span>
+      <span class="pg-meter"><span style="--fill: {{ (bucket.cards / most) if most else 0 }}"></span></span>
+      <span class="pg-muted">{{ bucket.cards }}</span>
+    </span>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ── groups ───────────────────────────────────────────────────────────────── #}
+<section class="pg-card">
+  <h2>Groups</h2>
+  {% if groups %}
+  <table class="pg-table">
+    <thead>
+      <tr><th>Group</th><th>Can name</th><th></th><th>Weakest</th></tr>
+    </thead>
+    <tbody>
+      {% for group in groups %}
+      <tr>
+        <td><a href="/groups/{{ group.id }}">{{ group.name }}</a></td>
+        <td class="pg-muted">{{ group.known }} / {{ group.members }}{% if group.due %} · {{ group.due }} due{% endif %}</td>
+        <td><span class="pg-meter"><span style="--fill: {{ group.rate or 0 }}"></span></span></td>
+        <td class="pg-muted">
+          {% for person in group.weakest %}{{ person.display_name }}{% if not loop.last %}, {% endif %}{% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="pg-muted">No groups yet — a group is the quickest way to say "the people from work".</p>
+  {% endif %}
+</section>
+
+{# ── the pairs ────────────────────────────────────────────────────────────── #}
+<section class="pg-card">
+  <h2>Faces you swap</h2>
+  {% if confusion %}
+  <ul class="pg-pairs">
+    {% for pair in confusion %}
+    <li>
+      <span>
+        <a href="/people/{{ pair.person_id }}">{{ pair.display_name }}</a>
+        <span class="pg-muted">↔</span>
+        <a href="/people/{{ pair.confused_with_id }}">{{ pair.other_name }}</a>
+      </span>
+      <span class="pg-muted">{{ pair.mixups }} {{ 'mix-up' if pair.mixups == 1 else 'mix-ups' }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="pg-muted">These are the mistakes worth drilling: you know both faces, which is exactly why they collide.</p>
+  {% else %}
+  <p class="pg-muted">Nothing has been swapped yet, or nothing has been answered.</p>
+  {% endif %}
+</section>
+
+{# ── calibration ──────────────────────────────────────────────────────────── #}
+<section class="pg-card">
+  <h2>Confident, or right?</h2>
+  {% if calibration.rated %}
+  <div class="pg-grid2">
+    <div class="pg-cell">
+      <span class="pg-muted">When you were sure</span>
+      <b>{% if calibration.sure_rate is not none %}{{ (calibration.sure_rate * 100) | round | int }} %{% else %}—{% endif %}</b>
+      <span class="pg-muted">{{ calibration.sure_right }} right, {{ calibration.sure_wrong }} wrong</span>
+    </div>
+    <div class="pg-cell">
+      <span class="pg-muted">When you were not</span>
+      <b>{% if calibration.unsure_rate is not none %}{{ (calibration.unsure_rate * 100) | round | int }} %{% else %}—{% endif %}</b>
+      <span class="pg-muted">{{ calibration.unsure_right }} right, {{ calibration.unsure_wrong }} wrong</span>
+    </div>
+  </div>
+  <p class="pg-muted">
+    {% if calibration.separation is not none %}
+      {% if calibration.separation > 0.05 %}
+      Feeling certain is worth about {{ (calibration.separation * 100) | round | int }} points of accuracy
+      to you — which is a healthy gap, not a flattering one.
+      {% elif calibration.separation < -0.05 %}
+      You are <em>less</em> accurate when you feel sure — the mistakes worth reading twice.
+      {% else %}
+      Your certainty barely tracks your accuracy: worth knowing before you trust a hunch.
+      {% endif %}
+    {% endif %}
+    Based on {{ calibration.rated }} {{ 'answer' if calibration.rated == 1 else 'answers' }} where you said how sure you were.
+  </p>
+  {% if calibration.worst %}
+  <table class="pg-table">
+    <thead><tr><th>Said they were sure, and was wrong</th><th>Times</th></tr></thead>
+    <tbody>
+      {% for person in calibration.worst %}
+      <tr>
+        <td><a href="/people/{{ person.person_id }}">{{ person.display_name }}</a></td>
+        <td class="pg-muted">{{ person.times }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% else %}
+  <p class="pg-muted">
+    You have not told Kith how sure you were yet. The answer screen offers two small faces
+    once you have answered — "not sure" and "sure" — and this panel fills in. The part worth
+    having is the mistakes you were certain about.
+  </p>
+  {% endif %}
+</section>
+
+{# ── storage ──────────────────────────────────────────────────────────────── #}
+<section class="pg-card">
+  <h2>The whole thing</h2>
+  <p class="pg-muted">
+    {{ (storage.total / 1048576) | round(1) }} MB in one SQLite file —
+    {{ storage.photos }} {{ 'photo' if storage.photos == 1 else 'photos' }} taking
+    {{ (storage.photo_bytes / 1048576) | round(1) }} MB
+    ({{ (storage.per_photo / 1024) | round(1) }} KB each, downscaled to fit).
+    Nothing else on this machine, and nothing anywhere else: the backup is that one file.
+  </p>
+</section>
+{% endblock %}

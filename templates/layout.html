@@ -6,6 +6,7 @@
   <title>{% block title %}Kith{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/kith.css?v={{ asset_v() }}">
   <link rel="stylesheet" href="/static/css/trainer.css?v={{ asset_v() }}">
+  {% block head %}{% endblock %}
   <script src="/static/js/live-search.js?v={{ asset_v() }}" defer></script>
 </head>
 <body>
@@ -16,6 +17,7 @@
       <nav class="nav">
         <a class="pill {% if nav == 'cabinet' %}is-active{% endif %}" href="/cabinet">Cabinet</a>
         <a class="pill {% if nav == 'groups' %}is-active{% endif %}" href="/groups">Groups</a>
+        <a class="pill {% if nav == 'stats' %}is-active{% endif %}" href="/stats">Progress</a>
         <a class="pill {% if nav == 'train' %}is-active{% endif %}" href="/train">Train</a>
         <a class="pill {% if nav == 'status' %}is-active{% endif %}" href="/">Status</a>
         {% if s.auth_enabled %}

@@ -575,6 +575,19 @@ def derive_rating(
     return 3                                      # Good
 
 
+def _confidence(value: object) -> int | None:
+    """The optional "how sure were you", as stored for the calibration view.
+
+    Anything unrecognised becomes nothing rather than a guess: a fabricated confidence would
+    quietly poison the one statistic that is supposed to be about your own judgement.
+    """
+    try:
+        number = int(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
+    return number if number in (1, 2, 3) else None
+
+
 def submit(
     conn: sqlite3.Connection,
     session: dict,
@@ -659,6 +672,7 @@ def submit(
         hint_level=outcome.hint_level,
         latency_ms=outcome.latency_ms,
         chosen_person_id=outcome.chosen_person_id,
+        confidence=_confidence(answer.get("confidence")),
     )
     sessions_repo.record_answer(conn, session_id, correct=outcome.correct)
 
@@ -779,6 +793,7 @@ def _submit_board(
                 hint_level=0,
                 latency_ms=latency,
                 chosen_person_id=chosen_id,
+                confidence=_confidence(answer.get("confidence")),
             )
             sessions_repo.record_answer(conn, session_id, correct=correct)
 

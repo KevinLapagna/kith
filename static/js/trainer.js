@@ -99,6 +99,8 @@
     state.payload = payload;
     state.revealed = false;
     state.hintLevel = 0;
+    // Your confidence belongs to the prompt you were looking at, not to the run.
+    state.confidence = null;
     // Publish what is on screen: makes the screen testable from the outside, and tells a
     // stylesheet (or a future keyboard hint) which mode is asking.
     root.setAttribute("data-mode", payload.mode || "");
@@ -147,6 +149,10 @@
     } else {
       renderChoice(card, payload);
     }
+
+    // Only where there is a real answer to be sure *about*: free recall already asks you to
+    // rate yourself, and a study card asks nothing at all.
+    if (payload.mode !== "study" && !payload.hintable) card.appendChild(confidenceRow());
 
     stage.appendChild(card);
     var first = stage.querySelector("button");
@@ -207,6 +213,45 @@
       submit({ item_id: payload.item_id, ack: true });
     });
     container.appendChild(go);
+  }
+
+  // ── how sure you were ──────────────────────────────────────────────────────
+  // Two faces, deliberately optional, tapped *before* the verdict: a confidence given after
+  // you have seen the answer is a comment on it, not a memory of your own certainty. This is
+  // the only place the app asks you about yourself, and it is the only thing that can tell
+  // you your mistakes were confident ones.
+  function confidenceRow() {
+    var row = el("div", "confidence-row");
+    row.appendChild(el("span", "confidence-ask", "How sure?"));
+
+    [["😐", 1, "I was guessing"], ["😀", 2, "I was sure"]].forEach(function (face) {
+      var button = el("button", "btn small ghost", face[0]);
+      button.type = "button";
+      button.title = face[2];
+      button.setAttribute("aria-label", face[2]);
+      button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", function () {
+        choose(button, face[1]);
+      });
+      row.appendChild(button);
+    });
+
+    // Tapping the face you already chose takes it back: "I would rather not say" has to stay
+    // reachable, or the button is a trap.
+    function choose(button, value) {
+      var already = state.confidence === value;
+      Array.prototype.forEach.call(row.querySelectorAll("button"), function (other) {
+        other.className = "btn small ghost";
+        other.setAttribute("aria-pressed", "false");
+      });
+      state.confidence = already ? null : value;
+      if (!already) {
+        button.className = "btn small primary";
+        button.setAttribute("aria-pressed", "true");
+      }
+    }
+
+    return row;
   }
 
   function renderChoice(container, payload) {
@@ -364,6 +409,7 @@
   function submit(answer) {
     if (state.busy || state.finished) return;
     state.busy = true;
+    if (state.confidence) answer.confidence = state.confidence;
     acknowledgeAnswer();
     post("/api/sessions/" + sessionId + "/answer", answer)
       .then(function (data) {
