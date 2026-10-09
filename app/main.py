@@ -121,6 +121,11 @@ def create_app(settings: config.Settings | None = None) -> FastAPI:
     # JavaScript gets its own slice emitted into the page, so its wording lives in the same
     # catalogue as everything else and a locale needs no build step.
     i18n.set_locale(settings.locale)
+    # A catalogue that failed to reach the image turns every label into its own key — words
+    # become `cabinet.title` in front of the user — and no health check can see it. Fail at
+    # boot instead, where the container refuses loudly rather than lying quietly.
+    if not i18n.table("en"):
+        raise RuntimeError("the string catalogue is missing: locales/en.json did not arrive")
     templates.env.globals["t"] = i18n.t
     templates.env.globals["js_strings"] = i18n.js_strings
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")

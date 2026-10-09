@@ -21,6 +21,10 @@ RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 COPY app/ ./app/
 COPY templates/ ./templates/
 COPY static/ ./static/
+# The catalogue is a directory of its own, so this list has to name it: miss it and the image
+# ships an app that renders every label as its own key — invisible to health checks and to any
+# test that runs from the repo, where the file is simply present.
+COPY locales/ ./locales/
 COPY entrypoint.sh ./
 RUN chmod 0755 /app/entrypoint.sh
 

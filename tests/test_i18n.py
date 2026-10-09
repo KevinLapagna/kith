@@ -98,6 +98,25 @@ def test_an_unknown_key_returns_itself_rather_than_nothing() -> None:
     assert i18n.t("nope.not.a.key") == "nope.not.a.key"
 
 
+def test_the_image_recipe_copies_the_catalogue() -> None:
+    """The Containerfile copies by an explicit list, and the catalogue lives in a directory of
+    its own. Leave one line out and the image ships an app that renders `cabinet.title` to a
+    real visitor — while every test in this file passes, because on disk the file is present.
+    That is how this exact bug reached production once; this test is the cure."""
+    recipe = (ROOT / "Containerfile").read_text(encoding="utf-8")
+    assert "COPY locales/" in recipe, "the image would ship without its words"
+
+
+def test_a_missing_catalogue_stops_the_app_at_boot(monkeypatch) -> None:
+    """If the catalogue does go missing, the failure must be a refusal to start rather than a
+    page full of key names. Deleting the table and building the app proves which it is."""
+    monkeypatch.setattr(i18n, "table", lambda locale="en": {})
+    from app.main import create_app
+
+    with pytest.raises(RuntimeError):
+        create_app()
+
+
 def test_a_half_finished_locale_renders_anyway() -> None:
     """The fallback is per key, not per file: a locale is added a page at a time."""
     path = i18n.STRINGS_DIR / "zz.json"
