@@ -1,9 +1,12 @@
 {% extends "layout.html" %}
-{% block title %}Not found — Kith{% endblock %}
+{% block title %}{{ t('missing.title') }}{% endblock %}
 {% block content %}
-<div class="page-head"><h1>Not found</h1></div>
+<div class="page-head"><h1>{{ t('missing.heading') }}</h1></div>
 <div class="empty">
-  <p>There is no {{ what or 'page' }} here. It may have been deleted.</p>
-  <p><a class="btn ghost" href="/cabinet">Back to the cabinet</a></p>
+  {% if what == 'person' %}{% set thing = t('missing.thing.person') %}
+  {% elif what == 'group' %}{% set thing = t('missing.thing.group') %}
+  {% else %}{% set thing = t('missing.thing.page') %}{% endif %}
+  <p>{{ t('missing.body', what=thing) }}</p>
+  <p><a class="btn ghost" href="/cabinet">{{ t('missing.back') }}</a></p>
 </div>
 {% endblock %}

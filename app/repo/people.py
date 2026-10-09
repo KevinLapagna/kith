@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 import sqlite3
 
+from app import i18n
 from app.db import utcnow
 
 # The columns the cabinet form is allowed to write. Explicit on purpose: a stray form
@@ -194,7 +195,7 @@ def delete(conn: sqlite3.Connection, person_id: int) -> bool:
 def _validated(fields: dict[str, object], *, partial: bool = False) -> dict[str, object]:
     unknown = set(fields) - set(EDITABLE)
     if unknown:
-        raise InvalidPerson(f"not an editable field: {', '.join(sorted(unknown))}")
+        raise InvalidPerson(i18n.t("person.error.unknown_field", fields=", ".join(sorted(unknown))))
 
     values: dict[str, object] = {}
     for name, raw in fields.items():
@@ -206,7 +207,7 @@ def _validated(fields: dict[str, object], *, partial: bool = False) -> dict[str,
             # "Ask for": an optional override for what you are asked to produce. Empty is the
             # normal case and means "just the given name" — see RECALL_NAME.
             if len(text) > 120:
-                raise InvalidPerson("That name is too long (120 characters max).")
+                raise InvalidPerson(i18n.t("person.error.name_too_long"))
             values[name] = text
         elif name == "status":
             if not text:
@@ -217,7 +218,7 @@ def _validated(fields: dict[str, object], *, partial: bool = False) -> dict[str,
                 values[name] = "active"
                 continue
             if text not in ALLOWED_STATUS:
-                raise InvalidPerson(f"Status must be one of: {', '.join(ALLOWED_STATUS)}.")
+                raise InvalidPerson(i18n.t("person.error.bad_status", statuses=", ".join(ALLOWED_STATUS)))
             values[name] = text
         else:
             values[name] = text or None
@@ -225,9 +226,7 @@ def _validated(fields: dict[str, object], *, partial: bool = False) -> dict[str,
     if not partial:
         # A new person needs something to ask for: an explicit override, or a first name.
         if not (values.get("display_name") or values.get("given_name")):
-            raise InvalidPerson(
-                "A first name is required — or write what you want to be asked for."
-            )
+            raise InvalidPerson(i18n.t("person.error.first_name_required"))
         # The column is NOT NULL and doubles as the override slot, so an override that was
         # not supplied is stored empty; the given name is what gets asked for.
         if values.get("display_name") is None:

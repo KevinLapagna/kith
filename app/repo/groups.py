@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 
+from app import i18n
 from app.db import utcnow
 from app.repo import people as people
 
@@ -80,7 +81,7 @@ def create(conn: sqlite3.Connection, name: str, note: str | None = None) -> int:
             (clean, (note or "").strip() or None, utcnow()),
         )
     except sqlite3.IntegrityError as exc:
-        raise InvalidGroup(f"There is already a group called “{clean}”.") from exc
+        raise InvalidGroup(i18n.t("groups.error.duplicate", name=clean)) from exc
     return int(cursor.lastrowid or 0)
 
 
@@ -92,7 +93,7 @@ def update(conn: sqlite3.Connection, group_id: int, *, name: str, note: str | No
             (clean, (note or "").strip() or None, group_id),
         ).rowcount
     except sqlite3.IntegrityError as exc:
-        raise InvalidGroup(f"There is already a group called “{clean}”.") from exc
+        raise InvalidGroup(i18n.t("groups.error.duplicate", name=clean)) from exc
     return changed > 0
 
 
@@ -156,7 +157,7 @@ def set_groups_for_person(conn: sqlite3.Connection, person_id: int, group_ids: l
 def _clean_name(name: str) -> str:
     clean = (name or "").strip()
     if not clean:
-        raise InvalidGroup("A group needs a name.")
+        raise InvalidGroup(i18n.t("groups.error.name_required"))
     if len(clean) > 80:
-        raise InvalidGroup("That group name is too long (80 characters max).")
+        raise InvalidGroup(i18n.t("groups.error.name_too_long"))
     return clean

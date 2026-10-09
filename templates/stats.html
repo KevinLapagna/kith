@@ -1,61 +1,53 @@
 {% extends "layout.html" %}
-{% block title %}Progress · Kith{% endblock %}
+{% block title %}{{ t("stats.title") }}{% endblock %}
 {% block head %}
   <link rel="stylesheet" href="/static/css/stats.css?v={{ asset_v() }}">
 {% endblock %}
 
 {% block content %}
-<h1>Progress</h1>
+<h1>{{ t("stats.heading") }}</h1>
 
 {# ── capability, not activity ─────────────────────────────────────────────── #}
 <section class="pg-card">
   {% if knowledge.trainable %}
   <p class="pg-big">
-    You can name <strong>{{ knowledge.known }}</strong> of {{ knowledge.trainable }}
-    {{ 'person' if knowledge.trainable == 1 else 'people' }}.
+    {{ t("stats.named_lead") }} <strong>{{ knowledge.known }}</strong>
+    {{ t("stats.named_tail", n=knowledge.trainable, person=t("stats.person.one") if knowledge.trainable == 1 else t("stats.person.many")) }}
   </p>
   <p class="pg-muted">
-    A face counts as known once you could name it after a month away — currently
-    {{ (knowledge.rate * 100) | round | int }} % of the cabinet.
-    {{ knowledge.cards }} {{ 'card' if knowledge.cards == 1 else 'cards' }} in all,
-    {{ knowledge.suspended }} suspended.
+    {{ t("stats.known_explainer", rate=(knowledge.rate * 100) | round | int, n=knowledge.cards, card=t("stats.card.one") if knowledge.cards == 1 else t("stats.card.many"), suspended=knowledge.suspended) }}
   </p>
   {% else %}
-  <p class="pg-big">Nothing to train on yet.</p>
-  <p class="pg-muted">Add a person with a photo and this page starts counting.</p>
+  <p class="pg-big">{{ t("stats.empty_title") }}</p>
+  <p class="pg-muted">{{ t("stats.empty_hint") }}</p>
   {% endif %}
 </section>
 
 {# ── the last thirty days ─────────────────────────────────────────────────── #}
 <section class="pg-card">
-  <h2>The last {{ retention.days }} days</h2>
+  <h2>{{ t("stats.retention_heading", days=retention.days) }}</h2>
   {% if retention.answered %}
   <p class="pg-muted">
-    {{ retention.answered }} answers over {{ retention.active_days }}
-    {{ 'day' if retention.active_days == 1 else 'days' }},
-    {{ retention.correct }} of them right —
-    {{ (retention.rate * 100) | round | int }} %.
-    That is a floor rather than a flattering number: every hard day is in it.
+    {{ t("stats.retention_line", answered=retention.answered, active_days=retention.active_days, day=t("stats.day.one") if retention.active_days == 1 else t("stats.day.many"), correct=retention.correct, rate=(retention.rate * 100) | round | int) }}
   </p>
   <div class="pg-bars" role="img"
-       aria-label="Answers per day over the last {{ retention.days }} days, peaking at {{ peak }}">
+       aria-label="{{ t('stats.bars_label', days=retention.days, peak=peak) }}">
     {% for day in series %}
     <span class="pg-bar" style="--h: {{ (day.answered / peak) if peak else 0 }}"
-          title="{{ day.day }} — {{ day.answered }} {{ 'answer' if day.answered == 1 else 'answers' }}{% if day.answered %}, {{ day.correct }} right{% endif %}"></span>
+          title="{{ day.day }} — {{ day.answered }} {{ t('stats.answer.one') if day.answered == 1 else t('stats.answer.many') }}{% if day.answered %}{{ t('stats.bar_right', n=day.correct) }}{% endif %}"></span>
     {% endfor %}
   </div>
   {% else %}
-  <p class="pg-muted">Nothing answered yet.</p>
+  <p class="pg-muted">{{ t("stats.nothing_answered") }}</p>
   {% endif %}
 </section>
 
 {# ── where the effort sits ────────────────────────────────────────────────── #}
 {% if knowledge.cards %}
 <section class="pg-card">
-  <h2>How hard the cabinet is</h2>
+  <h2>{{ t("stats.difficulty_heading") }}</h2>
   <p class="pg-muted">
-    Scheduler difficulty, 1 to 10, over cards you have actually answered. A cabinet piling
-    up on the right means a lot of faces that need a lot of reminding.
+    {{ t("stats.difficulty_explainer") }}
   </p>
   <div class="pg-buckets">
     {% set most = difficulty | map(attribute='cards') | max %}
@@ -72,18 +64,18 @@
 
 {# ── groups ───────────────────────────────────────────────────────────────── #}
 <section class="pg-card">
-  <h2>Groups</h2>
+  <h2>{{ t("stats.groups_heading") }}</h2>
   {% if groups %}
   <table class="pg-table">
     <thead>
-      <tr><th>Group</th><th>Can name</th><th></th><th>Weakest</th></tr>
+      <tr><th>{{ t("stats.table_group") }}</th><th>{{ t("stats.table_can_name") }}</th><th></th><th>{{ t("stats.table_weakest") }}</th></tr>
     </thead>
     <tbody>
       {% for group in groups %}
       <tr>
         <td><a href="/groups/{{ group.id }}">{{ group.name }}</a>
-          · <a href="/sheet?group={{ group.id }}" title="Printable sheet of this group">sheet</a></td>
-        <td class="pg-muted">{{ group.known }} / {{ group.members }}{% if group.due %} · {{ group.due }} due{% endif %}</td>
+          · <a href="/sheet?group={{ group.id }}" title="{{ t('stats.sheet_link_title') }}">{{ t("stats.sheet_link") }}</a></td>
+        <td class="pg-muted">{{ group.known }} / {{ group.members }}{% if group.due %} · {{ t("stats.due", n=group.due) }}{% endif %}</td>
         <td><span class="pg-meter"><span style="--fill: {{ group.rate or 0 }}"></span></span></td>
         <td class="pg-muted">
           {% for person in group.weakest %}{{ person.display_name }}{% if not loop.last %}, {% endif %}{% endfor %}
@@ -93,52 +85,41 @@
     </tbody>
   </table>
   {% else %}
-  <p class="pg-muted">No groups yet — a group is the quickest way to say "the people from work".</p>
+  <p class="pg-muted">{{ t("stats.no_groups") }}</p>
   {% endif %}
 </section>
 
 {# ── your data ────────────────────────────────────────────────────────────── #}
 <section class="pg-card">
-  <h2>Your data</h2>
+  <h2>{{ t("stats.data_heading") }}</h2>
   {% set data_state = request.query_params.get('data') %}
   {% if data_state == 'imported' %}
-  <p><strong>Cabinet replaced.</strong> The database it replaced was kept beside it as
-    <code>replaced-*.sqlite</code>, so this is undoable by hand if it was the wrong file.</p>
+  <p><strong>{{ t("stats.replaced") }}</strong> {{ t("stats.replaced_pre") }} <code>{{ t("stats.replaced_file") }}</code>{{ t("stats.replaced_post") }}</p>
   {% elif data_state %}
-  <p><strong>{{
-    {'confirm': 'Nothing was replaced: the word REPLACE was not typed.',
-     'nofile': 'Nothing was replaced: no file arrived.',
-     'notsqlite': 'Nothing was replaced: that file is not a SQLite database.',
-     'corrupt': 'Nothing was replaced: that database failed its integrity check.',
-     'version': 'Nothing was replaced: that database was written by a different Kith schema.',
-     'tables': 'Nothing was replaced: that database is missing Kith tables.',
-     'huge': 'Nothing was replaced: that file is larger than 1 GB.'}.get(data_state,
-     'Nothing was replaced.') }}</strong></p>
+  {% set replace_error_codes = ('confirm', 'nofile', 'notsqlite', 'corrupt', 'version', 'tables', 'huge') %}
+  <p><strong>{{ t('stats.replace_error.' + data_state) if data_state in replace_error_codes else t('stats.replace_error.unknown') }}</strong></p>
   {% endif %}
   <p class="pg-muted">
-    Everything Kith knows — every person, every photo, every review — lives in a single SQLite
-    file, which is why the backup <em>is</em> the export. Take a copy before a restore, and
-    every so often for no better reason than that it takes one click.
+    {{ t("stats.data_explainer_pre") }} <em>{{ t("stats.data_explainer_em") }}</em> {{ t("stats.data_explainer_post") }}
   </p>
-  <p><a href="/api/backup">Download the database</a></p>
-  <p><a href="/sheet">Printable sheet — everyone</a></p>
+  <p><a href="/api/backup">{{ t("stats.download") }}</a></p>
+  <p><a href="/sheet">{{ t("stats.printable_everyone") }}</a></p>
   <details>
-    <summary>Restore from a copy</summary>
+    <summary>{{ t("stats.restore_summary") }}</summary>
     <p class="pg-muted">
-      This replaces everything currently in the cabinet, and only a file that is a readable
-      Kith database on this schema will be accepted. Whatever it replaces is snapshotted first.
+      {{ t("stats.restore_explainer") }}
     </p>
     <form method="post" action="/api/import" enctype="multipart/form-data">
       <p><input type="file" name="database" accept=".sqlite,application/vnd.sqlite3"></p>
-      <p><input type="text" name="confirm" placeholder="type REPLACE" autocomplete="off"></p>
-      <p><button type="submit">Replace the cabinet</button></p>
+      <p><input type="text" name="confirm" placeholder="{{ t('stats.confirm_placeholder') }}" autocomplete="off"></p>
+      <p><button type="submit">{{ t("stats.replace_button") }}</button></p>
     </form>
   </details>
 </section>
 
 {# ── the pairs ────────────────────────────────────────────────────────────── #}
 <section class="pg-card">
-  <h2>Faces you swap</h2>
+  <h2>{{ t("stats.confusion_heading") }}</h2>
   {% if confusion %}
   <ul class="pg-pairs">
     {% for pair in confusion %}
@@ -148,48 +129,47 @@
         <span class="pg-muted">↔</span>
         <a href="/people/{{ pair.confused_with_id }}">{{ pair.other_name }}</a>
       </span>
-      <span class="pg-muted">{{ pair.mixups }} {{ 'mix-up' if pair.mixups == 1 else 'mix-ups' }}</span>
+      <span class="pg-muted">{{ pair.mixups }} {{ t("stats.mixup.one") if pair.mixups == 1 else t("stats.mixup.many") }}</span>
     </li>
     {% endfor %}
   </ul>
-  <p class="pg-muted">These are the mistakes worth drilling: you know both faces, which is exactly why they collide.</p>
+  <p class="pg-muted">{{ t("stats.confusion_explainer") }}</p>
   {% else %}
-  <p class="pg-muted">Nothing has been swapped yet, or nothing has been answered.</p>
+  <p class="pg-muted">{{ t("stats.no_confusion") }}</p>
   {% endif %}
 </section>
 
 {# ── calibration ──────────────────────────────────────────────────────────── #}
 <section class="pg-card">
-  <h2>Confident, or right?</h2>
+  <h2>{{ t("stats.calibration_heading") }}</h2>
   {% if calibration.rated %}
   <div class="pg-grid2">
     <div class="pg-cell">
-      <span class="pg-muted">When you were sure</span>
+      <span class="pg-muted">{{ t("stats.sure_label") }}</span>
       <b>{% if calibration.sure_rate is not none %}{{ (calibration.sure_rate * 100) | round | int }} %{% else %}—{% endif %}</b>
-      <span class="pg-muted">{{ calibration.sure_right }} right, {{ calibration.sure_wrong }} wrong</span>
+      <span class="pg-muted">{{ t("stats.right_wrong", right=calibration.sure_right, wrong=calibration.sure_wrong) }}</span>
     </div>
     <div class="pg-cell">
-      <span class="pg-muted">When you were not</span>
+      <span class="pg-muted">{{ t("stats.unsure_label") }}</span>
       <b>{% if calibration.unsure_rate is not none %}{{ (calibration.unsure_rate * 100) | round | int }} %{% else %}—{% endif %}</b>
-      <span class="pg-muted">{{ calibration.unsure_right }} right, {{ calibration.unsure_wrong }} wrong</span>
+      <span class="pg-muted">{{ t("stats.right_wrong", right=calibration.unsure_right, wrong=calibration.unsure_wrong) }}</span>
     </div>
   </div>
   <p class="pg-muted">
     {% if calibration.separation is not none %}
       {% if calibration.separation > 0.05 %}
-      Feeling certain is worth about {{ (calibration.separation * 100) | round | int }} points of accuracy
-      to you — which is a healthy gap, not a flattering one.
+      {{ t("stats.calibration_positive", points=(calibration.separation * 100) | round | int) }}
       {% elif calibration.separation < -0.05 %}
-      You are <em>less</em> accurate when you feel sure — the mistakes worth reading twice.
+      {{ t("stats.calibration_negative_pre") }} <em>{{ t("stats.calibration_negative_em") }}</em> {{ t("stats.calibration_negative_post") }}
       {% else %}
-      Your certainty barely tracks your accuracy: worth knowing before you trust a hunch.
+      {{ t("stats.calibration_neutral") }}
       {% endif %}
     {% endif %}
-    Based on {{ calibration.rated }} {{ 'answer' if calibration.rated == 1 else 'answers' }} where you said how sure you were.
+    {{ t("stats.calibration_based", n=calibration.rated, answer=t("stats.answer.one") if calibration.rated == 1 else t("stats.answer.many")) }}
   </p>
   {% if calibration.worst %}
   <table class="pg-table">
-    <thead><tr><th>Said they were sure, and was wrong</th><th>Times</th></tr></thead>
+    <thead><tr><th>{{ t("stats.worst_heading") }}</th><th>{{ t("stats.times_heading") }}</th></tr></thead>
     <tbody>
       {% for person in calibration.worst %}
       <tr>
@@ -202,22 +182,16 @@
   {% endif %}
   {% else %}
   <p class="pg-muted">
-    You have not told Kith how sure you were yet. The answer screen offers two small faces
-    once you have answered — "not sure" and "sure" — and this panel fills in. The part worth
-    having is the mistakes you were certain about.
+    {{ t("stats.calibration_empty") }}
   </p>
   {% endif %}
 </section>
 
 {# ── storage ──────────────────────────────────────────────────────────────── #}
 <section class="pg-card">
-  <h2>The whole thing</h2>
+  <h2>{{ t("stats.storage_heading") }}</h2>
   <p class="pg-muted">
-    {{ (storage.total / 1048576) | round(1) }} MB in one SQLite file —
-    {{ storage.photos }} {{ 'photo' if storage.photos == 1 else 'photos' }} taking
-    {{ (storage.photo_bytes / 1048576) | round(1) }} MB
-    ({{ (storage.per_photo / 1024) | round(1) }} KB each, downscaled to fit).
-    Nothing else on this machine, and nothing anywhere else: the backup is that one file.
+    {{ t("stats.storage_line", total=(storage.total / 1048576) | round(1), photos=storage.photos, photo=t("stats.photo.one") if storage.photos == 1 else t("stats.photo.many"), size=(storage.photo_bytes / 1048576) | round(1), each=(storage.per_photo / 1024) | round(1)) }}
   </p>
 </section>
 {% endblock %}

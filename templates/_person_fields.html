@@ -3,21 +3,21 @@
    and optionally require_first_name (a new person needs one; an edit may predate the field). #}
 <div class="row">
   <div class="field">
-    <label for="given_name">First name <span class="muted">(what you'll be asked)</span></label>
+    <label for="given_name">{{ t('person.fields.given_name') }} <span class="muted">{{ t('person.fields.given_name_hint') }}</span></label>
     <input id="given_name" name="given_name" type="text" maxlength="120"
            value="{{ values.get('given_name') or '' }}" autocomplete="off"
            {% if require_first_name %}required{% endif %}>
   </div>
   <div class="field">
-    <label for="family_name">Last name <span class="muted">(shown small beside the answer)</span></label>
+    <label for="family_name">{{ t('person.fields.family_name') }} <span class="muted">{{ t('person.fields.family_name_hint') }}</span></label>
     <input id="family_name" name="family_name" type="text" maxlength="120"
            value="{{ values.get('family_name') or '' }}" autocomplete="off">
   </div>
   <div class="field">
-    <label for="status">Status</label>
+    <label for="status">{{ t('person.fields.status') }}</label>
     <select id="status" name="status">
       {% for option in ['active', 'paused', 'archived'] %}
-      <option value="{{ option }}" {% if (values.get('status') or 'active') == option %}selected{% endif %}>{{ option }}</option>
+      <option value="{{ option }}" {% if (values.get('status') or 'active') == option %}selected{% endif %}>{% if option == 'active' %}{{ t('person.status.active') }}{% elif option == 'paused' %}{{ t('person.status.paused') }}{% else %}{{ t('person.status.archived') }}{% endif %}</option>
       {% endfor %}
     </select>
   </div>
@@ -25,13 +25,13 @@
 
 <div class="row">
   <div class="field">
-    <label for="display_name">Ask for <span class="muted">(only if it should differ from the first name)</span></label>
+    <label for="display_name">{{ t('person.fields.display_name') }} <span class="muted">{{ t('person.fields.display_name_hint') }}</span></label>
     <input id="display_name" name="display_name" type="text" maxlength="120"
            value="{{ values.get('display_name') or '' }}" autocomplete="off"
-           placeholder="leave empty — the first name is used">
+           placeholder="{{ t('person.fields.display_name_placeholder') }}">
   </div>
   <div class="field">
-    <label for="nickname">Nickname</label>
+    <label for="nickname">{{ t('person.fields.nickname') }}</label>
     <input id="nickname" name="nickname" type="text" maxlength="120"
            value="{{ values.get('nickname') or '' }}" autocomplete="off">
   </div>
@@ -39,39 +39,39 @@
 
 <div class="row">
   <div class="field">
-    <label for="where_met">Where you met</label>
+    <label for="where_met">{{ t('person.fields.where_met') }}</label>
     <input id="where_met" name="where_met" type="text" value="{{ values.get('where_met') or '' }}" autocomplete="off">
   </div>
   <div class="field">
-    <label for="met_on">When <span class="muted">(date)</span></label>
+    <label for="met_on">{{ t('person.fields.met_on') }} <span class="muted">{{ t('person.fields.met_on_hint') }}</span></label>
     <input id="met_on" name="met_on" type="date" value="{{ values.get('met_on') or '' }}">
   </div>
   <div class="field">
-    <label for="pronunciation">Pronunciation</label>
+    <label for="pronunciation">{{ t('person.fields.pronunciation') }}</label>
     <input id="pronunciation" name="pronunciation" type="text" value="{{ values.get('pronunciation') or '' }}"
-           placeholder="AH-na" autocomplete="off">
+           placeholder="{{ t('person.fields.pronunciation_placeholder') }}" autocomplete="off">
   </div>
 </div>
 
 <div class="field">
-  <label for="feature_note">Distinguishing feature <span class="muted">(what makes this face different)</span></label>
+  <label for="feature_note">{{ t('person.fields.feature_note') }} <span class="muted">{{ t('person.fields.feature_note_hint') }}</span></label>
   <input id="feature_note" name="feature_note" type="text" value="{{ values.get('feature_note') or '' }}"
-         placeholder="gap between the front teeth" autocomplete="off">
+         placeholder="{{ t('person.fields.feature_note_placeholder') }}" autocomplete="off">
 </div>
 
 <div class="field">
-  <label for="mnemonic">Your mnemonic</label>
+  <label for="mnemonic">{{ t('person.fields.mnemonic') }}</label>
   <input id="mnemonic" name="mnemonic" type="text" value="{{ values.get('mnemonic') or '' }}"
-         placeholder="Anna from anatomy, the one who runs" autocomplete="off">
+         placeholder="{{ t('person.fields.mnemonic_placeholder') }}" autocomplete="off">
 </div>
 
 <div class="field">
-  <label for="notes">Notes</label>
+  <label for="notes">{{ t('person.fields.notes') }}</label>
   <textarea id="notes" name="notes" rows="3">{{ values.get('notes') or '' }}</textarea>
 </div>
 
 <fieldset class="fieldset">
-  <legend>Groups</legend>
+  <legend>{{ t('person.fields.groups') }}</legend>
   {% if groups %}
   <div class="checklist">
     {% for group in groups %}
@@ -83,6 +83,6 @@
     {% endfor %}
   </div>
   {% else %}
-  <p class="muted small">No groups yet — <a href="/groups">make one</a> to train on a subset of people.</p>
+  <p class="muted small">{{ t('person.fields.groups_empty_before') }} <a href="/groups">{{ t('person.fields.groups_empty_link') }}</a> {{ t('person.fields.groups_empty_after') }}</p>
   {% endif %}
 </fieldset>

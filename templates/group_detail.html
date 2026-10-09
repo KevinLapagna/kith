@@ -1,31 +1,31 @@
 {% extends "layout.html" %}
 {% from "_name.html" import person_name %}
-{% block title %}{{ group.name }} — Kith{% endblock %}
+{% block title %}{{ t('groups.title_detail', name=group.name) }}{% endblock %}
 {% block content %}
 <div class="page-head">
   <h1>{{ group.name }}</h1>
-  <a class="btn ghost" href="/groups">All groups</a>
+  <a class="btn ghost" href="/groups">{{ t('groups.all') }}</a>
 </div>
-<p class="muted small">{{ group.members }} {{ 'person' if group.members == 1 else 'people' }}</p>
+<p class="muted small">{{ t('groups.count.one', n=group.members) if group.members == 1 else t('groups.count.many', n=group.members) }}</p>
 
 {% if error %}<p class="notice err">{{ error }}</p>{% endif %}
 
 <form class="card" method="post" action="/groups/{{ group.id }}">
-  <h2>Name &amp; members</h2>
+  <h2>{{ t('groups.form.heading') }}</h2>
   <div class="row">
     <div class="field">
-      <label for="name">Name</label>
+      <label for="name">{{ t('groups.form.name') }}</label>
       <input id="name" name="name" type="text" required maxlength="80" value="{{ group.name }}">
     </div>
     <div class="field">
-      <label for="note">Note</label>
+      <label for="note">{{ t('groups.form.note') }}</label>
       <input id="note" name="note" type="text" value="{{ group.note or '' }}">
     </div>
   </div>
 
   {% if candidates %}
   <fieldset class="fieldset">
-    <legend>Members</legend>
+    <legend>{{ t('groups.members.legend') }}</legend>
     <div class="checklist">
       {% for person in candidates %}
       <label>
@@ -33,22 +33,22 @@
                {% if person.id in member_ids %}checked{% endif %}>
         <span>
           {{ person_name(person) }}
-          {% if not person.photo_id %}<span class="muted small">no photo</span>{% endif %}
+          {% if not person.photo_id %}<span class="muted small">{{ t('groups.no_photo') }}</span>{% endif %}
         </span>
       </label>
       {% endfor %}
     </div>
   </fieldset>
   {% else %}
-  <p class="muted small">Nobody in the cabinet yet — <a href="/people/new">add someone</a> first.</p>
+  <p class="muted small">{{ t('groups.candidates.empty_before') }} <a href="/people/new">{{ t('groups.candidates.empty_link') }}</a> {{ t('groups.candidates.empty_after') }}</p>
   {% endif %}
 
-  <button class="btn primary" type="submit">Save group</button>
+  <button class="btn primary" type="submit">{{ t('groups.form.save') }}</button>
 </form>
 
 {% if members %}
 <section class="card">
-  <h2>In this group</h2>
+  <h2>{{ t('groups.members.heading') }}</h2>
   <div class="people">
     {% for person in members %}
     <a class="person {% if person.status != 'active' %}is-off{% endif %}" href="/people/{{ person.id }}">
@@ -61,7 +61,7 @@
       </span>
       <span class="meta">
         <span class="name">{{ person_name(person) }}</span>
-        <span class="sub">{% if not person.has_photo %}no photo yet{% endif %}</span>
+        <span class="sub">{% if not person.has_photo %}{{ t('groups.no_photo_yet') }}{% endif %}</span>
       </span>
     </a>
     {% endfor %}
@@ -70,11 +70,11 @@
 {% endif %}
 
 <section class="danger-zone">
-  <h2>Remove</h2>
-  <p class="muted small">Deleting a group removes only the grouping — the people stay in the cabinet.</p>
+  <h2>{{ t('groups.remove.heading') }}</h2>
+  <p class="muted small">{{ t('groups.remove.body') }}</p>
   <form method="post" action="/groups/{{ group.id }}/delete"
-        onsubmit="return confirm('Delete the group {{ group.name }}?')">
-    <button class="btn danger" type="submit">Delete group</button>
+        onsubmit="return confirm('{{ t('groups.confirm_delete', name=group.name) }}')">
+    <button class="btn danger" type="submit">{{ t('groups.remove.submit') }}</button>
   </form>
 </section>
 {% endblock %}

@@ -1,32 +1,35 @@
 {% extends "layout.html" %}
 {% from "_name.html" import person_name %}
-{% block title %}Cabinet — Kith{% endblock %}
+{% block title %}{{ t('cabinet.title') }}{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>The cabinet</h1>
-  <a class="btn primary" href="/people/new">Add someone</a>
+  <h1>{{ t('cabinet.heading') }}</h1>
+  <a class="btn primary" href="/people/new">{{ t('cabinet.add') }}</a>
 </div>
 
 <form class="toolbar" method="get" action="/cabinet" role="search">
-  <input type="search" name="q" value="{{ q }}" placeholder="Search names, notes, mnemonics…"
-         aria-label="Search people" autocomplete="off" autocapitalize="off" spellcheck="false"
+  <input type="search" name="q" value="{{ q }}" placeholder="{{ t('cabinet.search.placeholder') }}"
+         aria-label="{{ t('cabinet.search.aria') }}" autocomplete="off" autocapitalize="off" spellcheck="false"
          enterkeyhint="search">
-  <select name="group" aria-label="Filter by group">
-    <option value="">Everyone</option>
+  <select name="group" aria-label="{{ t('cabinet.filter.group_aria') }}">
+    <option value="">{{ t('cabinet.filter.everyone') }}</option>
     {% for item in groups %}
     <option value="{{ item.id }}" {% if group == item.id %}selected{% endif %}>
       {{ item.name }} ({{ item.members }})
     </option>
     {% endfor %}
   </select>
-  <select name="status" aria-label="Filter by status">
+  <select name="status" aria-label="{{ t('cabinet.filter.status_aria') }}">
     {% for option in ['active', 'paused', 'archived', ''] %}
     <option value="{{ option }}" {% if status == option %}selected{% endif %}>
-      {{ option or 'any status' }}
+      {% if option == 'active' %}{{ t('cabinet.status.active') }}
+      {% elif option == 'paused' %}{{ t('cabinet.status.paused') }}
+      {% elif option == 'archived' %}{{ t('cabinet.status.archived') }}
+      {% else %}{{ t('cabinet.status.any') }}{% endif %}
     </option>
     {% endfor %}
   </select>
-  <button class="btn" type="submit">Filter</button>
+  <button class="btn" type="submit">{{ t('cabinet.filter.submit') }}</button>
 </form>
 
 {# Everything below the toolbar is one swapped region (static/js/live-search.js replaces
@@ -35,11 +38,11 @@
    server renders this same markup. #}
 <div id="results" data-results>
   <p class="muted small">
-    {{ people|length }} shown · {{ stats.trainable }} trainable
-    {% if stats.without_photos %} · {{ stats.without_photos }} without a photo{% endif %}
-    · {{ stats.photos }} photos · {{ (stats.photo_bytes / 1048576)|round(1) }} MB
+    {{ t('cabinet.count.shown', n=people|length) }} · {{ t('cabinet.count.trainable', n=stats.trainable) }}
+    {% if stats.without_photos %} · {{ t('cabinet.count.without_photo', n=stats.without_photos) }}{% endif %}
+    · {{ t('cabinet.count.photos', n=stats.photos) }} · {{ t('cabinet.count.mb', n=(stats.photo_bytes / 1048576)|round(1)) }}
     {% if q or group or status != 'active' %}
-    <a class="btn ghost small" href="/cabinet">Clear</a>
+    <a class="btn ghost small" href="/cabinet">{{ t('cabinet.clear') }}</a>
     {% endif %}
   </p>
 
@@ -59,7 +62,7 @@
         <span class="sub">
           {% if person.nickname %}{{ person.nickname }}
           {% elif person.where_met %}{{ person.where_met }}
-          {% elif not person.photo_id %}no photo yet
+          {% elif not person.photo_id %}{{ t('cabinet.no_photo') }}
           {% endif %}
         </span>
       </span>
@@ -69,11 +72,11 @@
   {% else %}
   <div class="empty">
     {% if q or group or status != 'active' %}
-      <p>Nobody matches that.</p>
-      <p><a class="btn ghost" href="/cabinet">Clear the filters</a></p>
+      <p>{{ t('cabinet.empty.filtered_title') }}</p>
+      <p><a class="btn ghost" href="/cabinet">{{ t('cabinet.empty.filtered_action') }}</a></p>
     {% else %}
-      <p>The cabinet is empty.</p>
-      <p><a class="btn primary" href="/people/new">Add the first person</a></p>
+      <p>{{ t('cabinet.empty.title') }}</p>
+      <p><a class="btn primary" href="/people/new">{{ t('cabinet.empty.action') }}</a></p>
     {% endif %}
   </div>
   {% endif %}

@@ -17,14 +17,15 @@ from app.modes.reverse import Reverse
 
 class Listen(Reverse):
     key = "listen"
-    label = "Listening — hear the name, pick the face"
+    label_key = "mode.listen.label"
+    prompt_key = "mode.listen.prompt"
     direction = "name_to_face"
     demand = 4            # one rung above reverse: no written name to read
 
     def build(self, ctx: BuildContext) -> dict:
         payload = super().build(ctx)
         name = str(ctx.target["display_name"])
-        payload["prompt"] = "Listen, then pick the face."
+        payload["prompt"] = self.prompt
         payload["speak"] = name
         payload["name"] = name
         return payload

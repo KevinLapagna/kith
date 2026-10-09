@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% if group_name %}{{ group_name }}{% else %}Everyone{% endif %} — Kith sheet</title>
+<title>{% if group_name %}{{ group_name }}{% else %}{{ t("sheet.everyone") }}{% endif %} — {{ t("sheet.title_suffix") }}</title>
 <link rel="stylesheet" href="/static/css/sheet.css?v={{ asset_v() }}">
 </head>
 <body>
 <div class="sh-tools">
-  <button type="button" onclick="window.print()">Print</button>
-  <span>{{ rows | length }} {{ 'face' if rows | length == 1 else 'faces' }}</span>
-  <a href="/stats">back to Progress</a>
+  <button type="button" onclick="window.print()">{{ t("sheet.print") }}</button>
+  <span>{{ rows | length }} {{ t("sheet.face.one") if rows | length == 1 else t("sheet.face.many") }}</span>
+  <a href="/stats">{{ t("sheet.back") }}</a>
 </div>
 
-<h1>{% if group_name %}{{ group_name }}{% else %}Everyone{% endif %}</h1>
+<h1>{% if group_name %}{{ group_name }}{% else %}{{ t("sheet.everyone") }}{% endif %}</h1>
 
 {% if rows %}
 <ul class="sh-grid">
@@ -22,7 +22,7 @@
     {% if person.photo_id %}
     <img src="/photos/{{ person.photo_id }}.webp?size=full" alt="">
     {% else %}
-    <span class="sh-blank">no photo</span>
+    <span class="sh-blank">{{ t("sheet.no_photo") }}</span>
     {% endif %}
     <span class="sh-name">{{ person.asked_name }}</span>
     {% if person.family_name %}<span class="sh-family">{{ person.family_name }}</span>{% endif %}
@@ -31,7 +31,7 @@
   {% endfor %}
 </ul>
 {% else %}
-<p>Nobody here yet.</p>
+<p>{{ t("sheet.nobody") }}</p>
 {% endif %}
 </body>
 </html>

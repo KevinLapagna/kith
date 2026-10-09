@@ -13,7 +13,8 @@ from app.modes.base import BuildContext, Mode, Outcome, person_photo_url
 
 class StudyCard(Mode):
     key = "study"
-    label = "Study card (first look, no question)"
+    label_key = "mode.study.label"
+    prompt_key = "mode.study.prompt"
     direction = "none"
     demand = 1
     min_people = 1
@@ -25,7 +26,7 @@ class StudyCard(Mode):
         return {
             "mode": self.key,
             "direction": self.direction,
-            "prompt": "First look — no question.",
+            "prompt": self.prompt,
             "photo_url": person_photo_url(ctx.target, full=True),
             "options": [],
             "hintable": False,

@@ -17,7 +17,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
-from app import auth
+from app import auth, i18n
 
 log = logging.getLogger("kith.auth")
 
@@ -74,7 +74,7 @@ def build_router() -> APIRouter:
                 "login.html",
                 status_code=401,
                 next=target,
-                error="That password was not accepted.",
+                error=i18n.t("login.error"),
             )
 
         token = auth.issue_token(settings.session_secret, days=settings.session_days)

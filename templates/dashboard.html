@@ -1,68 +1,65 @@
 {% extends "layout.html" %}
-{% block title %}Kith — status{% endblock %}
+{% block title %}{{ t("dashboard.title") }}{% endblock %}
 
 {% block content %}
 <section class="hero">
-  <h1>{% if s.ok %}Ready.{% else %}Attention needed.{% endif %}</h1>
+  <h1>{% if s.ok %}{{ t("dashboard.ready") }}{% else %}{{ t("dashboard.attention") }}{% endif %}</h1>
   <p class="lede">
     {% if s.ok %}
-      Storage, schema and write access all check out. The cabinet holds the people and
-      their photos; the trainer that drills them arrives in M2.
+      {{ t("dashboard.lede_ok") }}
     {% else %}
-      Something in the storage layer is not healthy — the details below say which part.
-      This page is deliberately blunt because a half-working database is worse than a
-      stopped one.
+      {{ t("dashboard.lede_bad") }}
     {% endif %}
   </p>
 </section>
 
 {% if s.error %}
 <section class="card error">
-  <h2>Last error</h2>
+  <h2>{{ t("dashboard.last_error") }}</h2>
   <pre class="mono">{{ s.error }}</pre>
 </section>
 {% endif %}
 
 <section class="grid">
   <article class="card">
-    <h2>Database</h2>
+    <h2>{{ t("dashboard.database") }}</h2>
     <dl class="kv">
-      <dt>Status</dt><dd>{% if s.ok %}<span class="badge ok">healthy</span>{% else %}<span class="badge bad">degraded</span>{% endif %}</dd>
-      <dt>Writable</dt><dd>{% if s.db_writable %}<span class="badge ok">yes</span>{% else %}<span class="badge bad">no</span>{% endif %}</dd>
-      <dt>Schema</dt><dd class="mono">{{ s.schema }} <span class="muted">of {{ s.expected_schema }}</span></dd>
-      <dt>Journal</dt><dd class="mono">{{ s.pragma.journal_mode or "—" }}</dd>
-      <dt>Integrity</dt><dd class="mono">{{ s.pragma.integrity or "—" }}</dd>
-      <dt>File</dt><dd class="mono small path">{{ s.db_path | breakable_path }}</dd>
+      <dt>{{ t("dashboard.status") }}</dt><dd>{% if s.ok %}<span class="badge ok">{{ t("dashboard.healthy") }}</span>{% else %}<span class="badge bad">{{ t("dashboard.degraded") }}</span>{% endif %}</dd>
+      <dt>{{ t("dashboard.writable") }}</dt><dd>{% if s.db_writable %}<span class="badge ok">{{ t("dashboard.yes") }}</span>{% else %}<span class="badge bad">{{ t("dashboard.no") }}</span>{% endif %}</dd>
+      <dt>{{ t("dashboard.schema") }}</dt><dd class="mono">{{ s.schema }} <span class="muted">{{ t("dashboard.of") }} {{ s.expected_schema }}</span></dd>
+      <dt>{{ t("dashboard.journal") }}</dt><dd class="mono">{{ s.pragma.journal_mode or "—" }}</dd>
+      <dt>{{ t("dashboard.integrity") }}</dt><dd class="mono">{{ s.pragma.integrity or "—" }}</dd>
+      <dt>{{ t("dashboard.file") }}</dt><dd class="mono small path">{{ s.db_path | breakable_path }}</dd>
     </dl>
   </article>
 
   <article class="card">
-    <h2>Cabinet</h2>
+    <h2>{{ t("dashboard.cabinet") }}</h2>
     <dl class="kv">
-      <dt>Active</dt><dd class="mono">{{ stats.active }}</dd>
-      <dt>Paused</dt><dd class="mono">{{ stats.paused }}</dd>
-      <dt>Archived</dt><dd class="mono">{{ stats.archived }}</dd>
-      <dt>Trainable</dt><dd class="mono">{{ stats.trainable }} <span class="muted">with a photo</span></dd>
-      <dt>No photo yet</dt><dd class="mono">{{ stats.without_photos }}</dd>
-      <dt>Photos</dt><dd class="mono">{{ stats.photos }} · {{ (stats.photo_bytes / 1048576) | round(1) }} MB</dd>
+      <dt>{{ t("dashboard.active") }}</dt><dd class="mono">{{ stats.active }}</dd>
+      <dt>{{ t("dashboard.paused") }}</dt><dd class="mono">{{ stats.paused }}</dd>
+      <dt>{{ t("dashboard.archived") }}</dt><dd class="mono">{{ stats.archived }}</dd>
+      <dt>{{ t("dashboard.trainable") }}</dt><dd class="mono">{{ stats.trainable }} <span class="muted">{{ t("dashboard.with_photo") }}</span></dd>
+      <dt>{{ t("dashboard.no_photo") }}</dt><dd class="mono">{{ stats.without_photos }}</dd>
+      <dt>{{ t("dashboard.photos") }}</dt><dd class="mono">{{ stats.photos }} · {{ (stats.photo_bytes / 1048576) | round(1) }} {{ t("dashboard.mb") }}</dd>
     </dl>
-    <p><a class="btn primary" href="/cabinet">Open the cabinet</a></p>
+    <p><a class="btn primary" href="/cabinet">{{ t("dashboard.open_cabinet") }}</a></p>
   </article>
 
   <article class="card">
-    <h2>Runtime</h2>
+    <h2>{{ t("dashboard.runtime") }}</h2>
     <dl class="kv">
-      <dt>App</dt><dd>{{ s.app }} <span class="mono">{{ s.version }}</span></dd>
-      <dt>SQLite</dt><dd class="mono">{{ s.sqlite }}</dd>
-      <dt>Uptime</dt><dd class="mono">{{ s.uptime_s }} s</dd>
-      <dt>Timezone</dt><dd class="mono">{{ s.display_tz }} <span class="muted">(storage is UTC)</span></dd>
-      <dt>Login gate</dt><dd>{% if s.auth_enabled %}<span class="badge ok">on</span>{% else %}<span class="badge warn">off</span>{% endif %}</dd>
-      <dt>Data dir</dt><dd class="mono small path">{{ s.data_dir | breakable_path }}</dd>
+      <dt>{{ t("dashboard.app") }}</dt><dd>{{ s.app }} <span class="mono">{{ s.version }}</span></dd>
+      <dt>{{ t("dashboard.sqlite") }}</dt><dd class="mono">{{ s.sqlite }}</dd>
+      <dt>{{ t("dashboard.uptime") }}</dt><dd class="mono">{{ s.uptime_s }} {{ t("dashboard.seconds") }}</dd>
+      <dt>{{ t("dashboard.timezone") }}</dt><dd class="mono">{{ s.display_tz }} <span class="muted">{{ t("dashboard.storage_utc") }}</span></dd>
+      <dt>{{ t("dashboard.login_gate") }}</dt><dd>{% if s.auth_enabled %}<span class="badge ok">{{ t("dashboard.on") }}</span>{% else %}<span class="badge warn">{{ t("dashboard.off") }}</span>{% endif %}</dd>
+      <dt>{{ t("dashboard.data_dir") }}</dt><dd class="mono small path">{{ s.data_dir | breakable_path }}</dd>
     </dl>
   </article>
 
   <article class="card">
-    <h2>Groups</h2>
+    <h2>{{ t("dashboard.groups") }}</h2>
     {% if groups %}
     <ul class="plain">
       {% for group in groups[:6] %}
@@ -72,25 +69,22 @@
     </ul>
     {% else %}
     <p class="muted small">
-      Groups let you train on a subset — one side of the family, a project team, or
-      exactly the people you keep mixing up.
+      {{ t("dashboard.groups_empty") }}
     </p>
     {% endif %}
-    <p><a class="btn ghost" href="/groups">Manage groups</a></p>
+    <p><a class="btn ghost" href="/groups">{{ t("dashboard.manage_groups") }}</a></p>
   </article>
 </section>
 
 <section class="card note">
-  <h2>M1 — the cabinet</h2>
-  <p>People, photos, groups and search, plus the login gate that makes this safe to put
-    behind the house reverse proxy. Photos are downscaled on import and their metadata
-    is dropped before they touch the database.</p>
+  <h2>{{ t("dashboard.m1_heading") }}</h2>
+  <p>{{ t("dashboard.m1_body") }}</p>
   <ul class="roadmap">
-    <li class="done"><strong>M0</strong> container, migrations, health</li>
-    <li class="done"><strong>M1</strong> cabinet: people, photos, groups, search, login</li>
-    <li><strong>M2</strong> trainer: sessions, modes, verdicts</li>
-    <li><strong>M3</strong> scheduler &amp; selection engine</li>
-    <li><strong>M4</strong> stats, cheat sheet, backup, PWA</li>
+    <li class="done"><strong>{{ t("dashboard.m0_label") }}</strong> {{ t("dashboard.m0_text") }}</li>
+    <li class="done"><strong>{{ t("dashboard.m1_label") }}</strong> {{ t("dashboard.m1_text") }}</li>
+    <li><strong>{{ t("dashboard.m2_label") }}</strong> {{ t("dashboard.m2_text") }}</li>
+    <li><strong>{{ t("dashboard.m3_label") }}</strong> {{ t("dashboard.m3_text") }}</li>
+    <li><strong>{{ t("dashboard.m4_label") }}</strong> {{ t("dashboard.m4_text") }}</li>
   </ul>
 </section>
 {% endblock %}

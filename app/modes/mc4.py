@@ -12,7 +12,8 @@ from app.modes.base import BuildContext, Mode, Outcome, name_options, person_pho
 
 class MultipleChoice(Mode):
     key = "mc4"
-    label = "Multiple choice — 4 names, 1 face"
+    label_key = "mode.mc4.label"
+    prompt_key = "mode.mc4.prompt"
     direction = "face_to_name"
     demand = 2
     min_people = 4        # target + three distractors
@@ -24,7 +25,7 @@ class MultipleChoice(Mode):
         return {
             "mode": self.key,
             "direction": self.direction,
-            "prompt": "Who is this?",
+            "prompt": self.prompt,
             "photo_url": person_photo_url(ctx.target, full=True),
             "options": name_options(ctx.target, distractors, ctx.rng),
             "hintable": False,

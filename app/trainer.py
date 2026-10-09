@@ -22,6 +22,7 @@ from dataclasses import dataclass
 
 from fsrs import Rating
 
+from app import i18n
 from app import modes as mode_registry
 from app import selection
 from app.db import utcnow
@@ -245,7 +246,7 @@ def build_session(
 
     pool = training_pool(conn, grp_ids=grp_ids, person_ids=person_ids)
     if not pool:
-        raise NoPeople("nobody to train on with that filter")
+        raise NoPeople(i18n.t("train.no_people"))
 
     from app import ladder
 
@@ -254,7 +255,7 @@ def build_session(
         mode for mode in usable if mode.gradeable and mode.direction in cards_repo.DIRECTIONS
     ]
     if not graded:
-        raise NoModes("the enabled modes need more people than the cabinet has")
+        raise NoModes(i18n.t("train.no_modes_needs_people"))
 
     # ── two skills, two cards, two ladders ───────────────────────────────────
     # `face_to_name` is the primary axis, and the one a never-seen face is introduced on. A
@@ -411,10 +412,7 @@ def build_session(
 
     if not specs_chunks:
         if unusable:
-            raise NoModes(
-                "the modes you ticked have nothing to ask here - the confusion drill needs a "
-                "mix-up you have actually made"
-            )
+            raise NoModes(i18n.t("train.no_modes_nothing_to_ask"))
         if not primary and any(
             tiers[direction]
             for direction in cards_repo.DIRECTIONS
@@ -422,14 +420,8 @@ def build_session(
         ):
             # Only a backwards mode was ticked and there is nobody to ask backwards: a name→face
             # card is made for a face you have already met the right way round.
-            raise NoModes(
-                "reverse and listening come online for faces you have already met once - tick "
-                "multiple choice alongside them for a first run, or practise anyway"
-            )
-        raise NoPeople(
-            "nothing is due and no new faces were asked for - tick 'practise anyway' "
-            "and start again to go over these faces regardless"
-        )
+            raise NoModes(i18n.t("train.no_modes_backwards"))
+        raise NoPeople(i18n.t("train.nothing_due"))
 
     # Cap on what you are actually asked to recall; a study card rides along free.
     capped: list[dict] = []

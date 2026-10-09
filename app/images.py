@@ -19,6 +19,8 @@ import hashlib
 import io
 from dataclasses import dataclass
 
+from app import i18n
+
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 # The largest thing the app ever renders is a tablet in portrait, so 1024 is generous.
@@ -58,11 +60,11 @@ def _open(raw: bytes) -> Image.Image:
         image = Image.open(io.BytesIO(raw))
         image.load()
     except UnidentifiedImageError as exc:
-        raise ImageRejected("That file is not an image Kith can read.") from exc
+        raise ImageRejected(i18n.t("error.not_an_image")) from exc
     except Image.DecompressionBombError as exc:
-        raise ImageRejected("That image is too large to process.") from exc
+        raise ImageRejected(i18n.t("error.image_too_large")) from exc
     except (OSError, ValueError) as exc:
-        raise ImageRejected(f"Could not read that image: {exc}") from exc
+        raise ImageRejected(i18n.t("error.could_not_read_image", detail=exc)) from exc
 
     # Apply the EXIF orientation now; the re-encode below drops the tag entirely.
     image = ImageOps.exif_transpose(image)
@@ -114,7 +116,7 @@ def hamming(hex_a: str, hex_b: str) -> int:
 def import_image(raw: bytes) -> Imported:
     """Turn uploaded bytes into the two WebP renditions we store, plus fingerprints."""
     if not raw:
-        raise ImageRejected("The upload was empty.")
+        raise ImageRejected(i18n.t("error.empty_image"))
     image = _open(raw)
     full = _fit(image, MAX_EDGE)
     thumb = _fit(full, THUMB_EDGE)

@@ -1,16 +1,16 @@
 {% extends "layout.html" %}
-{% block title %}New person — Kith{% endblock %}
+{% block title %}{{ t('person.title_new') }}{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>New person</h1>
-  <a class="btn ghost" href="/cabinet">Back to the cabinet</a>
+  <h1>{{ t('person.new') }}</h1>
+  <a class="btn ghost" href="/cabinet">{{ t('person.back') }}</a>
 </div>
 
 {% if error %}<p class="notice err">{{ error }}</p>{% endif %}
 
 <form class="card" method="post" action="/people">
 {% with require_first_name = true %}{% include "_person_fields.html" %}{% endwith %}
-  <button class="btn primary" type="submit">Add to the cabinet</button>
-  <span class="muted small">Photos come next: save, then upload on their page.</span>
+  <button class="btn primary" type="submit">{{ t('person.form.add') }}</button>
+  <span class="muted small">{{ t('person.form.photos_note') }}</span>
 </form>
 {% endblock %}

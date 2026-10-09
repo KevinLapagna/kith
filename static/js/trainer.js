@@ -33,7 +33,7 @@
   try {
     state.envelope = JSON.parse(bootEl.textContent);
   } catch (err) {
-    stage.textContent = "This session could not be started.";
+    stage.textContent = window.KITH_STRINGS["js.session_failed"];
     return;
   }
   // The bootstrap is a snapshot of the first prompt, and a study card names the person.
@@ -47,6 +47,15 @@
     if (className) node.className = className;
     if (text !== undefined && text !== null) node.textContent = text;
     return node;
+  }
+
+  // Every word this file shows comes from the catalogue emitted into the page by the layout,
+  // so a locale needs no rebuild here. `fill` substitutes {placeholders} the way i18n.t does.
+  function fill(text, fields) {
+    Object.keys(fields || {}).forEach(function (field) {
+      text = String(text).split("{" + field + "}").join(fields[field]);
+    });
+    return text;
   }
 
   function clear(node) {
@@ -74,7 +83,7 @@
     }
     var img = document.createElement("img");
     img.src = url;
-    img.alt = name ? "Photo of " + name : "Photo";
+    img.alt = name ? fill(window.KITH_STRINGS["js.photo_of"], { name: name }) : window.KITH_STRINGS["js.photo"];
     img.decoding = "async";
     frame.appendChild(img);
     return frame;
@@ -89,8 +98,9 @@
     if (bar) bar.style.width = pct + "%";
     if (progressText) {
       progressText.textContent = planned
-        ? done + " of " + planned + (s.answers ? " · " + s.correct + "/" + s.answers + " right" : "")
-        : (s.answers || 0) + " answered";
+        ? fill(window.KITH_STRINGS["js.progress_of"], { done: done, planned: planned }) +
+          (s.answers ? fill(window.KITH_STRINGS["js.progress_right"], { correct: s.correct, answers: s.answers }) : "")
+        : fill(window.KITH_STRINGS["js.progress_answered"], { count: s.answers || 0 });
     }
   }
 
@@ -122,7 +132,7 @@
     }
 
     var card = el("div", "ask ask-" + payload.mode);
-    if (payload.requeues) card.appendChild(el("span", "again-badge", "again"));
+    if (payload.requeues) card.appendChild(el("span", "again-badge", window.KITH_STRINGS["js.again"]));
 
     // Three shapes of question: the face is named (face→name), the name is the question
     // (name→face, with the name spoken when the mode says so), or a study card, which is
@@ -181,14 +191,14 @@
   function speakControls(payload) {
     var box = el("div", "speak");
     if (!speak(payload.speak)) {
-      box.appendChild(el("p", "hint muted small", "This browser cannot speak the name."));
+      box.appendChild(el("p", "hint muted small", window.KITH_STRINGS["js.no_speech"]));
     }
-    var again = el("button", "btn small ghost", "Say it again");
+    var again = el("button", "btn small ghost", window.KITH_STRINGS["js.say_again"]);
     again.type = "button";
     again.addEventListener("click", function () { speak(payload.speak); });
     box.appendChild(again);
 
-    var showName = el("button", "btn small ghost", "Show the name");
+    var showName = el("button", "btn small ghost", window.KITH_STRINGS["js.show_name"]);
     showName.type = "button";
     showName.addEventListener("click", function () {
       if (!box.parentNode) return;
@@ -207,7 +217,7 @@
     if (meta) info.appendChild(el("p", "meta", meta));
     container.appendChild(info);
 
-    var go = el("button", "btn primary big", "Got it — next");
+    var go = el("button", "btn primary big", window.KITH_STRINGS["js.got_it"]);
     go.type = "button";
     go.addEventListener("click", function () {
       submit({ item_id: payload.item_id, ack: true });
@@ -222,9 +232,9 @@
   // you your mistakes were confident ones.
   function confidenceRow() {
     var row = el("div", "confidence-row");
-    row.appendChild(el("span", "confidence-ask", "How sure?"));
+    row.appendChild(el("span", "confidence-ask", window.KITH_STRINGS["js.how_sure"]));
 
-    [["😐", 1, "I was guessing"], ["😀", 2, "I was sure"]].forEach(function (face) {
+    [["😐", 1, window.KITH_STRINGS["js.guessing"]], ["😀", 2, window.KITH_STRINGS["js.sure"]]].forEach(function (face) {
       var button = el("button", "btn small ghost", face[0]);
       button.type = "button";
       button.title = face[2];
@@ -267,7 +277,7 @@
         var tile = photo(option.photo_url, null, "option-photo");
         tile.setAttribute("aria-hidden", "true");
         button.appendChild(tile);
-        button.setAttribute("aria-label", "Face " + (index + 1));
+        button.setAttribute("aria-label", fill(window.KITH_STRINGS["js.face_n"], { n: index + 1 }));
       } else {
         button.appendChild(el("span", "label", option.label));
       }
@@ -284,17 +294,17 @@
     var hints = el("div", "hints");
     container.appendChild(hints);
 
-    var reveal = el("button", "btn primary big", "Reveal");
+    var reveal = el("button", "btn primary big", window.KITH_STRINGS["js.reveal"]);
     reveal.type = "button";
     reveal.addEventListener("click", doReveal);
     container.appendChild(reveal);
 
-    var hint = el("button", "btn small ghost", "Hint (H)");
+    var hint = el("button", "btn small ghost", window.KITH_STRINGS["js.hint"]);
     hint.type = "button";
     hint.addEventListener("click", askHint);
     container.appendChild(hint);
 
-    var noIdea = el("button", "btn small ghost", "Never seen them");
+    var noIdea = el("button", "btn small ghost", window.KITH_STRINGS["js.no_idea"]);
     noIdea.type = "button";
     noIdea.addEventListener("click", function () {
       submit({
@@ -318,7 +328,7 @@
     post("/api/sessions/" + sessionId + "/reveal", { item_id: payload.item_id })
       .then(function (data) {
         if (!data || !data.ok || !data.reveal) {
-          showError((data && data.error) || "Could not reveal that card.");
+          showError((data && data.error) || window.KITH_STRINGS["js.reveal_failed"]);
           return;
         }
         paintReveal(data.reveal);
@@ -342,7 +352,12 @@
     card.classList.add("is-revealed");
 
     var ratings = el("div", "ratings");
-    var labels = ["Didn't get it", "Hard", "Good", "Easy"];
+    var labels = [
+      window.KITH_STRINGS["js.rate_again"],
+      window.KITH_STRINGS["js.rate_hard"],
+      window.KITH_STRINGS["js.rate_good"],
+      window.KITH_STRINGS["js.rate_easy"]
+    ];
     labels.forEach(function (label, index) {
       var rating = index + 1;
       var button = el("button", "rate rate-" + rating);
@@ -401,7 +416,7 @@
       body: JSON.stringify(body)
     }).then(function (response) {
       return response.json().catch(function () {
-        return { ok: false, error: "unreadable response" };
+        return { ok: false, error: window.KITH_STRINGS["js.unreadable"] };
       });
     });
   }
@@ -415,7 +430,7 @@
       .then(function (data) {
         state.busy = false;
         if (!data || !data.ok) {
-          showError((data && data.error) || "Could not save that answer.");
+          showError((data && data.error) || window.KITH_STRINGS["js.save_failed"]);
           return;
         }
         state.envelope = data;
@@ -424,7 +439,7 @@
       })
       .catch(function () {
         state.busy = false;
-        showError("The connection dropped. Your answer was not saved — tap again.");
+        showError(window.KITH_STRINGS["js.offline"]);
       });
   }
 
@@ -452,7 +467,7 @@
     clear(feedback);
     if (!verdict.correct) {
       var box = el("div", "verdict wrong");
-      box.appendChild(nameLine("p", "verdict-line", "That was " + verdict.correct_name, verdict.correct_family));
+      box.appendChild(nameLine("p", "verdict-line", fill(window.KITH_STRINGS["js.that_was"], { name: verdict.correct_name }), verdict.correct_family));
       if (verdict.mnemonic) box.appendChild(el("p", "mnemonic", verdict.mnemonic));
       if (verdict.where_met) box.appendChild(el("p", "meta", verdict.where_met));
       feedback.appendChild(box);
@@ -461,7 +476,7 @@
     }
 
     state.next = next;
-    var advanceButton = el("button", "btn primary", "Continue (Enter)");
+    var advanceButton = el("button", "btn primary", window.KITH_STRINGS["js.continue"]);
     advanceButton.type = "button";
     advanceButton.addEventListener("click", advance);
     feedback.appendChild(advanceButton);
@@ -483,7 +498,7 @@
     clear(feedback);
     var box = el("div", "verdict board");
     box.appendChild(
-      el("p", "verdict-line", verdict.correct ? "Every name in the right place." : "These were swapped:")
+      el("p", "verdict-line", verdict.correct ? window.KITH_STRINGS["js.board_all_right"] : window.KITH_STRINGS["js.board_swapped"])
     );
     var list = el("ul", "board-results");
     (verdict.results || []).forEach(function (result) {
@@ -491,7 +506,7 @@
       row.appendChild(nameLine("span", "board-name", result.name, result.family_name));
       if (!result.correct) {
         row.appendChild(
-          el("span", "board-slip", result.chosen_name ? " — you put " + result.chosen_name + " here" : " — still wrong")
+          el("span", "board-slip", result.chosen_name ? fill(window.KITH_STRINGS["js.board_you_put"], { name: result.chosen_name }) : window.KITH_STRINGS["js.board_still_wrong"])
         );
       }
       list.appendChild(row);
@@ -499,7 +514,7 @@
     box.appendChild(list);
     feedback.appendChild(box);
     state.next = next;
-    var button = el("button", "btn primary", "Continue (Enter)");
+    var button = el("button", "btn primary", window.KITH_STRINGS["js.continue"]);
     button.type = "button";
     button.addEventListener("click", advance);
     feedback.appendChild(button);
@@ -565,7 +580,7 @@
 
   if (document.getElementById("end-session")) {
     document.getElementById("end-session").addEventListener("click", function () {
-      if (window.confirm("End this session and see the summary?")) {
+      if (window.confirm(window.KITH_STRINGS["js.end_confirm"])) {
         finish();
       }
     });

@@ -21,7 +21,7 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Resp
 # upload — checking against Starlette's class is what makes uploads arrive at all.
 from starlette.datastructures import UploadFile
 
-from app import db, images
+from app import db, i18n, images
 from app.repo import groups as groups_repo
 from app.repo import people as people_repo
 from app.repo import photos as photos_repo
@@ -32,21 +32,21 @@ from app.repo import stats as stats_repo
 STATIC = Path(__file__).resolve().parents[2] / "static"
 
 UPLOAD_ERRORS = {
-    "not_an_image": "That file is not an image Kith can read.",
-    "too_large": "That image is too big — 25 MB is the limit.",
-    "empty": "The upload arrived empty. Try again.",
-    "duplicate": "That exact photo is already in the cabinet.",
-    "generic": "The upload did not work. Try again.",
+    "not_an_image": "person.upload.not_an_image",
+    "too_large": "person.upload.too_large",
+    "empty": "person.upload.empty",
+    "duplicate": "person.upload.duplicate",
+    "generic": "person.upload.generic",
 }
 
 # Redirects carry short codes, never prose, so an attacker cannot make the app print
-# arbitrary text by crafting a URL.
+# arbitrary text by crafting a URL. Each code names a catalogue key, resolved at render time.
 OK_MESSAGES = {
-    "saved": "Changes saved.",
-    "deleted": "Removed from the cabinet.",
-    "primary": "Primary photo updated.",
-    "photo_deleted": "Photo deleted.",
-    "photos_added": "Photo added.",
+    "saved": "person.ok.saved",
+    "deleted": "person.ok.deleted",
+    "primary": "person.ok.primary",
+    "photo_deleted": "person.ok.photo_deleted",
+    "photos_added": "person.ok.photo_added",
 }
 
 
@@ -75,8 +75,11 @@ def ok_message(code: str | None) -> str | None:
         return None
     if code.startswith("photos_added_"):
         count = code.removeprefix("photos_added_")
-        return "Photo added." if count == "1" else f"{count} photos added."
-    return OK_MESSAGES.get(code)
+        if count == "1":
+            return i18n.t("person.ok.photo_added")
+        return i18n.t("person.ok.photos_added.many", n=count)
+    key = OK_MESSAGES.get(code)
+    return i18n.t(key) if key else None
 
 
 def build_router() -> APIRouter:
@@ -99,13 +102,13 @@ def build_router() -> APIRouter:
         with session(request) as conn:
             meta = photos_repo.get_meta(conn, photo_id)
             if meta is None:
-                return Response("No such photo.", status_code=404, media_type="text/plain")
+                return Response(i18n.t("person.photo.not_found"), status_code=404, media_type="text/plain")
             etag = f'"{meta["sha256"]}-{photo_id}-{"t" if thumb else "f"}"'
             if request.headers.get("if-none-match") == etag:
                 return Response(status_code=304, headers={"ETag": etag})
             blob = photos_repo.get_blob(conn, photo_id, thumb=thumb)
         if blob is None:
-            return Response("No such photo.", status_code=404, media_type="text/plain")
+            return Response(i18n.t("person.photo.not_found"), status_code=404, media_type="text/plain")
         data, mime = blob
         return Response(
             data,
@@ -201,7 +204,7 @@ def build_router() -> APIRouter:
                 "member_of": groups_repo.member_ids(conn, person_id),
                 "values": person,
                 "notice_ok": ok_message(ok),
-                "notice_err": UPLOAD_ERRORS.get(err or ""),
+                "notice_err": i18n.t(UPLOAD_ERRORS[err]) if err in UPLOAD_ERRORS else None,
                 "error": None,
             }
         return render(request, "person_detail.html", nav="cabinet", **context)
@@ -340,7 +343,7 @@ def build_router() -> APIRouter:
                     nav="groups",
                     groups=listing,
                     stats=stats,
-                    error="A group needs a name, and it must be unique.",
+                    error=i18n.t("groups.error.invalid"),
                     ok=None,
                 )
         return RedirectResponse(f"/groups/{group_id}", status_code=303)

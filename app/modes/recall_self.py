@@ -21,7 +21,8 @@ from app.modes.base import (
 
 class RecallSelf(Mode):
     key = "recall_self"
-    label = "Name it yourself (think, then reveal)"
+    label_key = "mode.recall_self.label"
+    prompt_key = "mode.recall_self.prompt"
     direction = "face_to_name"
     demand = 5
     min_people = 1
@@ -33,7 +34,7 @@ class RecallSelf(Mode):
         return {
             "mode": self.key,
             "direction": self.direction,
-            "prompt": "Who is this? Say the name out loud.",
+            "prompt": self.prompt,
             "photo_url": person_photo_url(ctx.target, full=True),
             "options": [],
             "hintable": True,

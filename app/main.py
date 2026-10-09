@@ -23,7 +23,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app import auth, config, db
+from app import auth, config, db, i18n
 from app.repo import groups as groups_repo
 from app.repo import people as people_repo
 from app.routers import auth_routes, data, pages, train
@@ -117,6 +117,12 @@ def create_app(settings: config.Settings | None = None) -> FastAPI:
     )
     app.state.settings = settings
     app.state.templates = templates
+    # One table per language, reachable from every template: `t("nav.cabinet")`. The trainer's
+    # JavaScript gets its own slice emitted into the page, so its wording lives in the same
+    # catalogue as everything else and a locale needs no build step.
+    i18n.set_locale(settings.locale)
+    templates.env.globals["t"] = i18n.t
+    templates.env.globals["js_strings"] = i18n.js_strings
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
     def authenticated(request: Request) -> bool:

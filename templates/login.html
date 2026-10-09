@@ -3,30 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sign in — Kith</title>
+  <title>{{ t("login.title") }}</title>
   <link rel="stylesheet" href="/static/css/kith.css?v={{ asset_v() }}">
 </head>
 <body>
   <main class="wrap login">
-    <a class="wordmark" href="/">Kith<span class="dot">.</span></a>
-    <h1>Sign in</h1>
-    <p class="muted small">One user, one password. It is remembered on this device for a while.</p>
+    <a class="wordmark" href="/">{{ t("brand.name") }}<span class="dot">.</span></a>
+    <h1>{{ t("login.sign_in") }}</h1>
+    <p class="muted small">{{ t("login.lede") }}</p>
 
     {% if error %}<p class="notice err">{{ error }}</p>{% endif %}
 
     <form class="card" method="post" action="/login">
       <input type="hidden" name="next" value="{{ next }}">
       <div class="field">
-        <label for="password">Password</label>
+        <label for="password">{{ t("login.password") }}</label>
         <input id="password" name="password" type="password" required autocomplete="current-password"
                autofocus>
       </div>
-      <button class="btn primary" type="submit">Sign in</button>
+      <button class="btn primary" type="submit">{{ t("login.sign_in") }}</button>
     </form>
 
     <p class="muted small">
-      Locked out? The password is set on the host with
-      <span class="mono">podman exec -it kith python -m app.cli hash-password</span>.
+      {{ t("login.locked_out") }}
+      <span class="mono">{{ t("login.command") }}</span>{{ t("login.locked_out_tail") }}
     </p>
   </main>
 </body>

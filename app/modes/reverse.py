@@ -23,7 +23,8 @@ from app.modes.base import (
 
 class Reverse(Mode):
     key = "reverse"
-    label = "Reverse — 4 faces, 1 name"
+    label_key = "mode.reverse.label"
+    prompt_key = "mode.reverse.prompt"
     direction = "name_to_face"
     demand = 3
     min_people = 4        # target + three distractor faces
@@ -35,7 +36,7 @@ class Reverse(Mode):
         return {
             "mode": self.key,
             "direction": self.direction,
-            "prompt": "Which one is this?",
+            "prompt": self.prompt,
             "name": str(ctx.target["display_name"]),
             "photo_url": None,
             "options": face_options(ctx.target, distractors, ctx.rng),

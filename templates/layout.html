@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Kith{% endblock %}</title>
+  <title>{% block title %}{{ t("brand.name") }}{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/kith.css?v={{ asset_v() }}">
   <link rel="stylesheet" href="/static/css/trainer.css?v={{ asset_v() }}">
   {% block head %}{% endblock %}
@@ -14,28 +14,30 @@
   <link rel="apple-touch-icon" href="/static/icon/apple-touch-icon.png">
   <meta name="theme-color" content="#f7f6f3" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#16151a" media="(prefers-color-scheme: dark)">
-  <meta name="apple-mobile-web-app-title" content="Kith">
+  <meta name="apple-mobile-web-app-title" content="{{ t("brand.name") }}">
   <script>
     // Installable, not offline-first: the shell is cached, the training itself never is.
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js?v={{ asset_v() }}");
     }
+    // The trainer's wording, out of the same catalogue as the rest of the interface.
+    window.KITH_STRINGS = {{ js_strings() | tojson }};
   </script>
 </head>
 <body>
   <header class="top">
     <div class="wrap top-inner">
-      <a class="wordmark" href="/">Kith<span class="dot">.</span></a>
-      <span class="tagline">names &amp; faces</span>
+      <a class="wordmark" href="/">{{ t("brand.name") }}<span class="dot">.</span></a>
+      <span class="tagline">{{ t("brand.tagline") }}</span>
       <nav class="nav">
-        <a class="pill {% if nav == 'cabinet' %}is-active{% endif %}" href="/cabinet">Cabinet</a>
-        <a class="pill {% if nav == 'groups' %}is-active{% endif %}" href="/groups">Groups</a>
-        <a class="pill {% if nav == 'stats' %}is-active{% endif %}" href="/stats">Progress</a>
-        <a class="pill {% if nav == 'train' %}is-active{% endif %}" href="/train">Train</a>
-        <a class="pill {% if nav == 'status' %}is-active{% endif %}" href="/">Status</a>
+        <a class="pill {% if nav == 'cabinet' %}is-active{% endif %}" href="/cabinet">{{ t("nav.cabinet") }}</a>
+        <a class="pill {% if nav == 'groups' %}is-active{% endif %}" href="/groups">{{ t("nav.groups") }}</a>
+        <a class="pill {% if nav == 'stats' %}is-active{% endif %}" href="/stats">{{ t("nav.progress") }}</a>
+        <a class="pill {% if nav == 'train' %}is-active{% endif %}" href="/train">{{ t("nav.train") }}</a>
+        <a class="pill {% if nav == 'status' %}is-active{% endif %}" href="/">{{ t("nav.status") }}</a>
         {% if s.auth_enabled %}
         <form class="inline" method="post" action="/logout">
-          <button class="pill" type="submit">Sign out</button>
+          <button class="pill" type="submit">{{ t("nav.signout") }}</button>
         </form>
         {% endif %}
       </nav>
@@ -49,10 +51,10 @@
   </main>
 
   <footer class="wrap foot">
-    <span>{{ s.app }} {{ s.version }} · schema {{ s.expected_schema }} · SQLite {{ s.sqlite }}</span>
+    <span>{{ t("footer.build", app=s.app, version=s.version, schema=s.expected_schema, sqlite=s.sqlite) }}</span>
     <span>
-      {% if s.auth_enabled %}password required{% else %}single user · loopback only{% endif %}
-      · one file · nothing leaves this machine
+      {% if s.auth_enabled %}{{ t("footer.auth") }}{% else %}{{ t("footer.noauth") }}{% endif %}
+      · {{ t("footer.private") }}
     </span>
   </footer>
 </body>

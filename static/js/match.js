@@ -17,6 +17,15 @@
     return node;
   }
 
+  // Every word here comes from the catalogue emitted into the page by the layout, so a locale
+  // needs no rebuild of this file. `fill` substitutes {placeholders} the way i18n.t does.
+  function fill(text, fields) {
+    Object.keys(fields || {}).forEach(function (field) {
+      text = String(text).split("{" + field + "}").join(fields[field]);
+    });
+    return text;
+  }
+
   function render(container, payload, onSubmit) {
     var places = {};
     var tray = el("div", "board-names");
@@ -73,8 +82,11 @@
     function refresh() {
       check.disabled = !complete();
       note.textContent = complete()
-        ? "All placed — check your answer when you are ready."
-        : Object.keys(places).length + " of " + (payload.faces || []).length + " placed";
+        ? window.KITH_STRINGS["js.match_all_placed"]
+        : fill(window.KITH_STRINGS["js.match_placed"], {
+            placed: Object.keys(places).length,
+            total: (payload.faces || []).length
+          });
     }
 
     // ── the tray: one chip per name, in its own order ────────────────────────
@@ -110,7 +122,7 @@
       slot.appendChild(el("span", "face-empty", "?"));
       var button = el("button", "face-hit", "");
       button.type = "button";
-      button.setAttribute("aria-label", "face");
+      button.setAttribute("aria-label", window.KITH_STRINGS["js.match_face_label"]);
       button.addEventListener("click", function () {
         if (held) { place(held, slot.getAttribute("data-face")); }
       });
@@ -119,13 +131,13 @@
     });
 
     var note = el("p", "hint muted small", "");
-    var check = el("button", "btn primary", "Check");
+    var check = el("button", "btn primary", window.KITH_STRINGS["js.match_check"]);
     check.type = "button";
     check.addEventListener("click", function () {
       if (complete() && typeof onSubmit === "function") onSubmit(places);
     });
 
-    container.appendChild(el("p", "prompt", payload.prompt || "Match each face to their name"));
+    container.appendChild(el("p", "prompt", payload.prompt || window.KITH_STRINGS["js.match_prompt"]));
     var layout = el("div", "board");
     layout.appendChild(board);
     layout.appendChild(tray);

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}No such session — Kith{% endblock %}
+{% block title %}{{ t('train.missing_title') }}{% endblock %}
 {% block content %}
-<h1>No such session</h1>
-<p class="notice">That session does not exist — it may have been from a database you have since replaced.</p>
-<p><a class="btn" href="/train">Start a session</a></p>
+<h1>{{ t('train.missing_heading') }}</h1>
+<p class="notice">{{ t('train.missing_body') }}</p>
+<p><a class="btn" href="/train">{{ t('train.missing_cta') }}</a></p>
 {% endblock %}

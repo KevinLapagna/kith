@@ -50,7 +50,7 @@ class MatchBase(Mode):
     input = "drag"                 # drag, or tap-tap — both are offered, neither is required
     board = True                   # one item, several people: graded by `grade_board`
     hintable = False               # nothing to hint at: every name is already on the board
-    prompt = "Match each face to their name"
+    prompt_key = "mode.match.prompt"
 
     def build(self, ctx: BuildContext) -> dict:
         roster = list(ctx.board)
@@ -123,7 +123,7 @@ class MatchBase(Mode):
 
 class Match3(MatchBase):
     key = "match3"
-    label = "Match 3 faces ↔ 3 names (drag)"
+    label_key = "mode.match3.label"
     demand = 3
     min_people = 3                 # the target plus two companions
     board_size = 3
@@ -131,7 +131,7 @@ class Match3(MatchBase):
 
 class Match6(MatchBase):
     key = "match6"
-    label = "Match 6 faces ↔ 6 names (drag)"
+    label_key = "mode.match6.label"
     demand = 4
     min_people = 6
     board_size = 6

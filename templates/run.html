@@ -1,27 +1,27 @@
 {% extends "layout.html" %}
-{% block title %}Training — Kith{% endblock %}
+{% block title %}{{ t('run.title') }}{% endblock %}
 {% block content %}
 <div class="trainer" id="trainer" data-session="{{ session_id }}">
   <div class="trainer-top">
-    <div class="progress" role="progressbar" aria-label="Session progress">
+    <div class="progress" role="progressbar" aria-label="{{ t('run.progress') }}">
       <div class="progress-bar" id="progress-bar" style="width:0%"></div>
     </div>
-    <span class="progress-text" id="progress-text">starting…</span>
-    <button class="btn small ghost" id="end-session" type="button">End</button>
+    <span class="progress-text" id="progress-text">{{ t('run.starting') }}</span>
+    <button class="btn small ghost" id="end-session" type="button">{{ t('run.end') }}</button>
   </div>
 
   {% if mode_labels %}
-  <p class="hint muted small" id="modes-in-play">This run can ask: {{ mode_labels|join(" · ") }}</p>
+  <p class="hint muted small" id="modes-in-play">{{ t('run.modes_prefix') }} {{ mode_labels|join(" · ") }}</p>
   {% endif %}
 
   <div class="stage" id="stage" aria-live="polite"></div>
 
   <div class="feedback" id="feedback"></div>
-  <p class="hint keys">Keyboard: <kbd>1</kbd>–<kbd>4</kbd> choose · <kbd>Space</kbd> reveal · <kbd>H</kbd> hint · <kbd>Enter</kbd> continue</p>
+  <p class="hint keys">{{ t('run.keys_label') }} <kbd>1</kbd>–<kbd>4</kbd> {{ t('run.keys_choose') }} · <kbd>{{ t('run.key_space') }}</kbd> {{ t('run.keys_reveal') }} · <kbd>H</kbd> {{ t('run.keys_hint') }} · <kbd>{{ t('run.key_enter') }}</kbd> {{ t('run.keys_continue') }}</p>
 </div>
 
 <noscript>
-  <p class="notice err">The trainer needs JavaScript. Everything else in Kith works without it.</p>
+  <p class="notice err">{{ t('run.noscript') }}</p>
 </noscript>
 
 <link rel="stylesheet" href="/static/css/match.css?v={{ asset_v() }}">

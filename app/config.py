@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 APP_NAME = "Kith"
-APP_VERSION = "0.10.1"
+APP_VERSION = "0.11.0"
 
 # Bumped by hand whenever a migration is added; tests assert it matches the highest
 # migration on disk, so the two can never drift apart silently.
@@ -55,6 +55,7 @@ class Settings:
     secure_cookies: bool = False
     max_upload_mb: int = 25
     display_tz: str = "Europe/Zurich"
+    locale: str = "en"
     log_level: str = "info"
 
     @property
@@ -89,5 +90,6 @@ class Settings:
             secure_cookies=env.get("KITH_SECURE_COOKIES", "off").strip().lower() in _TRUTHY,
             max_upload_mb=int(env.get("KITH_MAX_UPLOAD_MB", "25")),
             display_tz=env.get("TZ", "Europe/Zurich"),
+            locale=env.get("KITH_LOCALE", "en").strip().lower() or "en",
             log_level=env.get("KITH_LOG_LEVEL", "info").strip().lower(),
         )

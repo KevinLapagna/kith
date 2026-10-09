@@ -1,31 +1,30 @@
 {% extends "layout.html" %}
-{% block title %}Groups — Kith{% endblock %}
+{% block title %}{{ t('groups.title') }}{% endblock %}
 {% block content %}
 <div class="page-head">
-  <h1>Groups</h1>
+  <h1>{{ t('groups.heading') }}</h1>
 </div>
 <p class="lede">
-  Groups are just sets of people to train on — they overlap freely, and one person can
-  sit in as many as you like. A group is what a training run is drawn from.
+  {{ t('groups.lede') }}
 </p>
 
 {% if error %}<p class="notice err">{{ error }}</p>{% endif %}
 
 <section class="card">
-  <h2>New group</h2>
+  <h2>{{ t('groups.new.heading') }}</h2>
   <form method="post" action="/groups">
     <div class="row">
       <div class="field">
-        <label for="name">Name</label>
+        <label for="name">{{ t('groups.form.name') }}</label>
         <input id="name" name="name" type="text" required maxlength="80"
-               placeholder="Fabienne's family" autocomplete="off">
+               placeholder="{{ t('groups.form.name_placeholder') }}" autocomplete="off">
       </div>
       <div class="field">
-        <label for="note">Note <span class="muted">(optional)</span></label>
-        <input id="note" name="note" type="text" placeholder="who they are to you" autocomplete="off">
+        <label for="note">{{ t('groups.form.note') }} <span class="muted">{{ t('groups.form.note_optional') }}</span></label>
+        <input id="note" name="note" type="text" placeholder="{{ t('groups.form.note_placeholder') }}" autocomplete="off">
       </div>
     </div>
-    <button class="btn primary" type="submit">Create group</button>
+    <button class="btn primary" type="submit">{{ t('groups.form.create') }}</button>
   </form>
 </section>
 
@@ -34,12 +33,12 @@
   {% for group in groups %}
   <div class="group">
     <h3><a href="/groups/{{ group.id }}">{{ group.name }}</a></h3>
-    <p class="count">{{ group.members }} {{ 'person' if group.members == 1 else 'people' }}</p>
+    <p class="count">{{ t('groups.count.one', n=group.members) if group.members == 1 else t('groups.count.many', n=group.members) }}</p>
     {% if group.note %}<p class="muted small">{{ group.note }}</p>{% endif %}
   </div>
   {% endfor %}
 </div>
 {% else %}
-<p class="muted">No groups yet. You can still train on everyone once the trainer arrives.</p>
+<p class="muted">{{ t('groups.empty') }}</p>
 {% endif %}
 {% endblock %}

@@ -13,7 +13,7 @@ import random
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
-from app import db, modes, trainer
+from app import db, i18n, modes, trainer
 from app.repo import cards as cards_repo
 from app.repo import groups as groups_repo
 from app.repo import sessions as sessions_repo
@@ -162,7 +162,10 @@ def build_router() -> APIRouter:
         keep = dict(wanted=wanted, grp=grp, new_budget=new_budget, minutes=minutes, force=force)
         if not wanted:
             return remember(
-                RedirectResponse("/train?error=Pick+at+least+one+exercise", status_code=303),
+                RedirectResponse(
+                    f"/train?error={i18n.t('error.pick_a_mode').replace(' ', '+')}",
+                    status_code=303,
+                ),
                 request,
                 **keep,
             )

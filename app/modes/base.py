@@ -13,6 +13,8 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field
 
+from app import i18n
+
 
 @dataclass(frozen=True)
 class Outcome:
@@ -43,7 +45,8 @@ class Mode:
     """Base class: subclasses set the attributes and implement build/grade."""
 
     key: str = ""
-    label: str = ""
+    label_key: str = ""                   # catalogue key, resolved per request by `label`
+    prompt_key: str = ""                  # catalogue key, resolved per request by `prompt`
     direction: str = "face_to_name"       # face_to_name | name_to_face | none
     demand: int = 3                       # 1..5, drives adaptive difficulty (M3/M4)
     min_people: int = 1
@@ -54,6 +57,16 @@ class Mode:
     board: bool = False                   # one item, several people (match 3 / match 6)
     board_size: int = 0                   # how many, when board is True
     hintable: bool = False                # False for modes where a hint makes no sense
+
+    @property
+    def label(self) -> str:
+        """The builder's name for this mode, from the catalogue."""
+        return i18n.t(self.label_key)
+
+    @property
+    def prompt(self) -> str:
+        """The line the run screen shows above the question, from the catalogue."""
+        return i18n.t(self.prompt_key)
 
     def build(self, ctx: BuildContext) -> dict:  # pragma: no cover - interface
         raise NotImplementedError
@@ -200,7 +213,12 @@ def hints_for(name: str) -> list[str]:
     two = ("".join(letters[:2]).title() + "…") if len(letters) > 1 else opening
     half = first[: max(1, len(first) // 2 + 1)] + "…"
     words = len(parts)
-    shape = f"{syllables(first)} syllable{'s' if syllables(first) != 1 else ''}"
+    count = syllables(first)
+    shape = (
+        i18n.t("mode.hint.syllables_one", count=count)
+        if count == 1
+        else i18n.t("mode.hint.syllables_many", count=count)
+    )
     if words > 1:
-        shape += f", {words} words"
+        shape += i18n.t("mode.hint.words", count=words)
     return [opening, shape, two, half, clean]
